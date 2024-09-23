@@ -1,0 +1,6 @@
+/.venv
+/debug.log
+/res_data.json
+/test*
+/.idea
+/__pycache__ */
