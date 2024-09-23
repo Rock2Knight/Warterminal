@@ -2,17 +2,82 @@ import random
 import sys
 import json
 import asyncio
-
-from pydantic import BaseModel
 from logging import StreamHandler
 from loguru import logger
 
-from models import Point, Warrior, Archer, Varvar, Army
+from pydantic import BaseModel
+from fastapi import FastAPI
+from tortoise.filters import Filter
+
+from schemas import *
+from models import *
 
 logger.add("debug.log", format="{time} {level} {message}", level="INFO")
 
+app = FastAPI()
 
-async def output(army_win: Army, army_fail: Army):
+
+def play(game: Game) -> Game:
+    if not game.is_play:
+        return game
+
+    army_cnt_list = list([])
+    armies = await Army.all().order_by('id')
+
+    while len(armies) > 1:
+        
+
+
+
+@app.get("/")
+async def read_root():
+    # Тестовая запрос
+    return {"Hello": "World"}
+
+
+@app.post("/game/{army_count}/{units_count}")
+def start_game(army_count: int, units_count: int, game: Game):
+    unit_id = 1
+
+    #--------------------------------------------------------------
+    # Заполняем базу начальными значениями
+
+    for army in game.armies:
+        await Army.create(id=army.id, name=army.name, count=army.count) # Добавляем армию в базу
+        for unit in army.units:
+            # Формируем данные для каждого юнита армии
+            type_unit = None
+
+            # Тип юнита
+            match unit.unit_type:
+                case unit.unit_type.Warior:
+                    type_unit = 0
+                case unit.unit_type.Archer:
+                    type_unit = 1
+                case unit.unit_type.Varvar:
+                    type_unit = 2
+            unit_health, unit_damage, unit_defense = 100.0, 10.0, 50.0  # Дефолтные значения здоровья, атаки, защиты
+
+            # Ставим введенные значения, если они есть
+            if unit.health:
+                unit_health = unit_health
+            if unit.damage:
+                unit_damage = unit.damage
+            if unit.defene:
+                unit_defense = unit.defense
+
+            # Добавляем юнита в базу
+            await Unit.create(id=unit_id, typeunit_id=type_unit, army_id=army.id,
+                x_coord=unit.coord.x, y_coord=unit.coord.y, health=unit_health,
+                damage=unit_damage, defense=unit_defense)
+            unit_id += 1                                  # Инкрементируем id для следующей записи
+    
+
+
+    #return {"army_name": army.name, "army_id": army.id, "army_count": army.count}
+
+'''
+async def output(army_win: ArmyStatBase, army_fail: ArmyStatBase):
 
     result_army = army_win.model_dump()
     result_army['loss'] = army_win.count - len(list(army_win.units.keys()))
@@ -215,3 +280,4 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
+'''
