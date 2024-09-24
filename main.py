@@ -11,21 +11,113 @@ from tortoise.filters import Filter
 
 from schemas import *
 from models import *
+from controllers import *
+import crud
 
 logger.add("debug.log", format="{time} {level} {message}", level="INFO")
 
 app = FastAPI()
 
 
-def play(game: Game) -> Game:
+async def attack(attack_info: AttackDto, victim_unit: AbstractUnit):
+    dist = victim_unit.coord - self.coord
+    in_radius = abs(dist.x) < self.radius_dmg and abs(dist.y) < self.radius_dmg
+    if not in_radius:
+        self.move_to(unit, map1, 2)
+        dist = unit.coord - self.coord
+    if abs(dist.x) < self.radius_dmg and abs(dist.y) < self.radius_dmg:
+        p = random.choice(list(range(5)))
+        match p:
+            case 0 | 1: return None
+            case 2 | 3: return unit.damaged(self.damage)
+            case 4:
+                damage = self.damage * self.dmg_coef
+                return unit.damaged(damage)
+
+
+async def mass_attack(units_of_army: dict[str, list[BaseUnit]]):
+
+    for type_of_army, units in units_of_army.items():
+        id_attack = random.randint(0, len(units)-1)
+
+
+async def fight(army1: Army, army2: Army):
+    """ Тут уже сама  """
+
+
+def match_rival(army_id: int, army: Army, id_list: list, army_in_figths: set) -> tuple[army]:
+    fight_with = i
+    is_found_victim = False
+    res_rivals = None
+    while fight_with == i and not is_found_victim:
+        fight_with = random.choice(id_list)
+
+        async def wrap_match(fight_with: int, army_in_figths: set) -> Optional[tuple[Army]]:
+            res_rivals = None
+            if fight_with != i:
+                army_to_fight = await crud.get_army_by_id(army_id=fight_with)
+                if army_to_fight not in army_in_figths:
+                    army_to_fight = await crud.update_army_status(army_id=army_to_fight.id, figths_with=army.id)
+                    army = await crud.update_army_status(army_id=army.id, figths_with=army_to_fight.id)
+                    res_rivals = (army, army_to_fight)
+                    return res_rivals    
+
+        new_loop = asyncio.new_event_loop()
+        new_loop.run_until_complete()
+
+        if fight_with != i:
+            army_to_fight = await crud.get_army_by_id(army_id=fight_with)
+            if army_to_fight not in army_in_figths:
+                army_to_fight = await crud.update_army_status(army_id=army_to_fight.id, figths_with=army.id)
+                army = await crud.update_army_status(army_id=army.id, figths_with=army_to_fight.id)
+                res_rivals = (army, army_to_fight)
+                is_found_victim = True
+    
+    return res_rivals
+
+
+async def play(game: Game) -> Game:
     if not game.is_play:
         return game
 
     army_cnt_list = list([])
     armies = await Army.all().order_by('id')
+    army_in_figths = set()                   # Армии, которые находятся в бою
+    id_list = [army.id for army in armies]   # Список id армий
 
     while len(armies) > 1:
-        
+        # Цикл организации сражений
+
+        for i, army in enumerate(armies):
+            # Поиск соперника для армии
+
+            if army not in army_in_figths:
+                id_list = [army.id for army in armies]  
+                army, army_to_fight = match_rival(i, army, id_list, army_in_figths)  # Подбор армии-соперника
+                armies[i], armies[army.fight_with_id] = army, army_to_fight              # Обновляем данные об армиях
+                army_in_figths.add(army)                                      # Помечаем армии, как "в бою"
+                army_in_figths.add(army_to_fight)
+                await fight(army, army_to_fight)               # БИТВА!
+            else:
+                # Если армия не в бою
+                if not is_exist_army(army.fight_with_id):    # Проверка сущствования армии-соперника в базе
+                    id_list = [army.id for army in armies]
+                    army_in_figths.remove(army)              # Убираем у армии метку "в бою"
+                    army, army_to_fight = match_rival(i, army, id_list, army_in_figths) # Подбираем НОВОГО соперника для армии
+                    armies[i], armies[army.fight_with_id] = army, army_to_fight   # Сохраняем обновленные версии армий из пары в списке армий
+                    army_in_figths.add(army)                 # Помечаем армии как в бою
+                    army_in_figths.add(army_to_fight)
+                    await fight(army, army_to_fight)               # БИТВА!
+                if not army.fight_with_id:                   # Если армия до сих пор ни с кем не сражалсь
+                    potential_rivals = crud.get_free_armies(army.id)  # Ищем потенциальных соперников
+                    if potential_rivals:
+                        # Если они есть
+                        id_list = [rival.id for rival in potential_rivals]
+                        army, army_to_fight = match_rival(i, army, id_list, army_in_figths) # Подбираем соперника для армии
+                        armies[i], armies[army.fight_with_id] = army, army_to_fight              # Обновляем данные об армиях
+                        army_in_figths.add(army)                                      # Помечаем армии, как "в бою"
+                        army_in_figths.add(army_to_fight)
+                        await fight(army, army_to_fight)               # БИТВА!
 
 
 
@@ -77,23 +169,6 @@ def start_game(army_count: int, units_count: int, game: Game):
     #return {"army_name": army.name, "army_id": army.id, "army_count": army.count}
 
 '''
-async def output(army_win: ArmyStatBase, army_fail: ArmyStatBase):
-
-    result_army = army_win.model_dump()
-    result_army['loss'] = army_win.count - len(list(army_win.units.keys()))
-    result_army.pop('count')
-    result_army.pop('units')
-    print("\n")
-    logger.info(f"Army {army_win.name} won")
-    print("\n")
-    loss_army = army_fail.model_dump()
-    loss_army['loss'] = army_fail.count - len(list(army_fail.units.keys()))
-    logger.info(f"Loss: {loss_army['loss']}")
-    loss_army.pop('count')
-    loss_army.pop('units')
-    res_data = {"win": result_army, "loss": loss_army}
-    with open("res_data.json", 'w') as json_file:
-        json.dump(res_data, json_file)
 
 
 async def main():

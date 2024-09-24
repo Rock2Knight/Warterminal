@@ -8,3 +8,6 @@ async def init():
     )
     # Генерация схемы
     await Tortoise.generate_schemas()
+
+if __name__=='__main__':
+    run_async(init())

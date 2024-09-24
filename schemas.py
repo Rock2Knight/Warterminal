@@ -3,7 +3,7 @@ from abc import abstractmethod
 from loguru import logger
 from enum import Enum
 
-from pydantic import BaseModel
+from pydantic import BaseModel, validator, confloat, conint
 
 logger.add("debug.log", format="{time} {level} {message}", level="INFO")
 
@@ -23,30 +23,27 @@ class Point(BaseModel):
         return self
 
 
-class UnitType(Enum):
-    Warior = 0
-    Archer = 1
-    Varvar = 2
-
-
 class BaseUnit(BaseModel):
     id: int
-    health: float = 100.00
-    damage: float = 10.0
-    defense: float = 50
+    health: confloat(ge=100.0) = 100.00
+    damage: confloat(ge=10.0) = 10.0
+    defense: confloat(ge=50.0) = 50
     coord: Point
-    radius_dmg: int
+    radius_dmg: conint(ge=1)
     base_speed: int
     dmg_coef: float
 
+
+    @validator(['coord'])
+    def validate_coord(cls, v, **kwargs):
+        if not isinstance(v, Point):
+            return ValueError('Неправильный тип поля') 
+
     def damaged(self, damage: float) -> int:
         if self.health > 0:
-            if self.defense > 25:
-                self.health -= 0.5 * damage
-                self.defense -= 10
-            elif self.defense > 0:
-                self.health -= 0.8 * damage
-                self.defense -= 5
+            if self.defense > 0:
+                self.health = self.health - (damage - self.defense)
+                self.defense -= 2
             else:
                 self.health -= damage
         if self.health <= 0:
@@ -103,20 +100,21 @@ class BaseUnit(BaseModel):
             self.coord.y = map1.y - 1
 
 
-class Warrior(BaseUnit):
-    radius_dmg: float = 10
+
+class WarriorDto(BaseUnit):
+    radius_dmg: int = 10
     base_speed: int = 2
     dmg_coef: float = 1.5
 
 
-class Archer(BaseUnit):
-    radius_dmg: float = 20
+class ArcherDto(BaseUnit):
+    radius_dmg: int = 20
     base_speed: int = 2
     dmg_coef: float = 1.5
 
 
 class Varvar(BaseUnit):
-    radius_dmg: float = 8
+    radius_dmg: int = 8
     base_speed: int = 2
     dmg_coef: float = 2.5
 
@@ -125,7 +123,7 @@ class ArmyBase(BaseModel):
     id: int
     name: str
     count: int
-    units: dict[int, Warrior | Archer | Varvar] = dict()
+    units: dict[int, UnitType] = dict()
 
     def add_unit(self, count: int, voins: list[BaseUnit]):
         print("\nVoins in add_unit func:  ", [str(v) for v in voins])
@@ -161,3 +159,14 @@ class Game(BaseModel):
     is_over: bool = False
     win_armies: list[ArmyStat]
     fail_armies: list[ArmyStat]
+
+
+class AbstractAttackDto(BaseModel):
+    moving: Point
+    attack: confloat(ge=0)
+    radius_dmg: conint(ge=1)
+    base_speed: conint(ge=1)
+    dmg_coef: confloat(ge=1.0)
+
+class AttackDto(AbstractAttackDto):
+    pass
