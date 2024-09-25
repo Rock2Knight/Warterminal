@@ -1,13 +1,12 @@
 import asyncio
 from typing import Optional
+import random
 
-from tortoise.filters import Filter
-
-from models imoprt *
+from models import *
 
 
 async def get_army_by_id(army_id: int):
-    army = await Army.filter(id__eq=army1_id)
+    army = await Army.filter(id__eq=army_id)
     return army
 
 
@@ -16,8 +15,9 @@ async def get_army_units(army_id: int):
     archers = await Archer.all.filter(army_id__eq=army_id).order_by('id')
     varvars = await Varvar.all.filter(army_id__eq=army_id).order_by('id')    
     
-    units = {'warrior': list(wariors), 'archer': list(archers), 'varvar': list(varvars)}
-
+    units = wariors + archers + varvars
+    if units:
+        random.shuffle(units)
     return units
 
 
@@ -36,3 +36,26 @@ async def get_free_armies(army_id: int) -> Optional[list[Army]]:
     armies = await Army.filter(id__neq=army_id)
     armies = armies.filter(fight_with_id__is_null=True)
     return armies if armies else None
+
+async def get_concrete_unit(unit: AbstractUnit) -> AbstractUnit:
+    if isinstance(unit, Warrior):
+        res_unit = await Warrior.filter(id=unit.id).first()
+        return res_unit
+    elif isinstance(unit, Archer):
+        res_unit = await Archer.filter(id=unit.id).first()
+        return res_unit
+    elif isinstance(unit, Varvar):
+        res_unit = await Varvar.filter(id=unit.id).first()
+        return res_unit
+    else:
+        raise ValueError(f"Unknown unit type: {type(unit)}")
+
+async def delete_unit(unit: AbstractUnit):
+    if isinstance(unit, Warrior):
+        await Warrior.filter(id=unit.id).delete()
+    elif isinstance(unit, Archer):
+        await Archer.filter(id=unit.id).delete()
+    elif isinstance(unit, Varvar):
+        await Varvar.filter(id=unit.id).delete()
+    else:
+        raise ValueError(f"Unknown unit type: {type(unit)}")

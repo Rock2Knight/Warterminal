@@ -29,15 +29,28 @@ class BaseUnit(BaseModel):
     damage: confloat(ge=10.0) = 10.0
     defense: confloat(ge=50.0) = 50
     coord: Point
-    radius_dmg: conint(ge=1)
-    base_speed: int
-    dmg_coef: float
+    radius_dmg: conint(ge=1) = 10
+    base_speed: int = 2
+    dmg_coef: float = 1.5
+    dto_name: str = ""
 
 
-    @validator(['coord'])
+    @validator('coord')
     def validate_coord(cls, v, **kwargs):
         if not isinstance(v, Point):
-            return ValueError('Неправильный тип поля') 
+            return ValueError('Неправильный тип поля')
+
+
+    def coord_in_map(self, map1: Point):
+        if self.coord.x < 0:
+            self.coord.x = 1
+        elif self.coord.x > map1.x:
+            self.coord.x = map1.x - 1
+        if self.coord.y < 0:
+            self.coord.y = 1
+        elif self.coord.y > map1.y:
+            self.coord.y = map1.y - 1
+     
 
     def damaged(self, damage: float) -> int:
         if self.health > 0:
@@ -90,14 +103,7 @@ class BaseUnit(BaseModel):
             else:
                 self.coord.y = self.coord.y + 2 * speed
 
-        if self.coord.x < 0:
-            self.coord.x = 1
-        elif self.coord.x > map1.x:
-            self.coord.x = map1.x - 1
-        if self.coord.y < 0:
-            self.coord.y = 1
-        elif self.coord.y > map1.y:
-            self.coord.y = map1.y - 1
+        self.coord_in_map(map1)
 
 
 
@@ -105,25 +111,28 @@ class WarriorDto(BaseUnit):
     radius_dmg: int = 10
     base_speed: int = 2
     dmg_coef: float = 1.5
+    dto_name: str = "Warrior"
 
 
 class ArcherDto(BaseUnit):
     radius_dmg: int = 20
     base_speed: int = 2
     dmg_coef: float = 1.5
+    dto_name: str = "Archer"
 
 
 class Varvar(BaseUnit):
     radius_dmg: int = 8
     base_speed: int = 2
     dmg_coef: float = 2.5
+    dto_name: str = "Varvar"
 
 
 class ArmyBase(BaseModel):
     id: int
     name: str
     count: int
-    units: dict[int, UnitType] = dict()
+    units: dict[int, BaseUnit] = dict()
 
     def add_unit(self, count: int, voins: list[BaseUnit]):
         print("\nVoins in add_unit func:  ", [str(v) for v in voins])
@@ -157,8 +166,7 @@ class Game(BaseModel):
     armies: list[ArmyBase]
     is_play: bool = True
     is_over: bool = False
-    win_armies: list[ArmyStat]
-    fail_armies: list[ArmyStat]
+    win_army: ArmyStatBase
 
 
 class AbstractAttackDto(BaseModel):

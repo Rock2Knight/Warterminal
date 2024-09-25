@@ -35,14 +35,14 @@ class Warrior(AbstractUnit):
     dmg_coef = fields.FloatField(default=1.5)
 
 
-class Archer(Model):
+class Archer(AbstractUnit):
     # Лучник
     radius_dmg = fields.IntField(default=10)
     base_speed = fields.IntField(default=2)
     dmg_coef = fields.FloatField(default=1.5)
 
 
-class Varvar(Model):
+class Varvar(AbstractUnit):
     # Варвар
     radius_dmg = fields.IntField(default=8)
     base_speed = fields.IntField(default=2)
