@@ -6,11 +6,11 @@ from loguru import logger
 
 from tortoise.exceptions import IntegrityError
 
+from numba import jit
+
 from schemas import *
 from models import *
 import crud
-
-logger.add("debug.log", format="{time} {level} {message}", level="INFO")
 
 async def coord_in_map(unit: AbstractUnit, map1: Point) -> AbstractUnit:
     if unit.x_coord < 0:
@@ -25,7 +25,7 @@ async def coord_in_map(unit: AbstractUnit, map1: Point) -> AbstractUnit:
     return unit
 
 
-async def match_rival(army_id: int, army: Army, id_list: list, army_in_figths: set) -> Optional[tuple[Army]]:
+async def match_rival(army_id: int, army: Army, id_list: list, army_in_figths: set, timeout: int = 10) -> Optional[tuple[Army]]:
     """ 
     Подбор армии-соперника
     :param army_id:  id армии, для которой подбираем соперника
@@ -35,13 +35,18 @@ async def match_rival(army_id: int, army: Army, id_list: list, army_in_figths: s
     :return: tuple[Army, Army] - кортеж с армиями-соперниками
     """
 
+    logger.info("Point 3")
     fight_with = army_id
     is_found_victim = False
     res_rivals = None
     checked_id = list([])
+    t1 = time.perf_counter()
+    t2 = time.perf_counter()
+    prev_diff = t2 - t1
     while fight_with == army_id and not is_found_victim:
         fight_with = random.choice(id_list)
         if fight_with != army_id:
+            logger.info("Before get army by id")
             army_to_fight = await crud.get_army_by_id(army_id=fight_with) # Получаем потенциальную армию-соперника
             logger.info(f"id={army_to_fight}, type={type(army_to_fight)}")  # (1)
             if army_to_fight not in army_in_figths:
@@ -52,9 +57,18 @@ async def match_rival(army_id: int, army: Army, id_list: list, army_in_figths: s
                 res_rivals = (army, army_to_fight)  # Кортеж соперников
                 is_found_victim = True   # Отмечаем, что нашли противника
         if not fight_with in checked_id:
+            logger.info("Id in checked id list")
             checked_id.append(fight_with)   # Добавляем id потенциального соперника в список проверенных
         if len(checked_id) >= len(id_list) and not is_found_victim: 
+            logger.info("A victim is not found")
             return None   # Если не нашли противника, возвращаем None
+        t2 = time.perf_counter()
+        diff = t2 - t1
+        if diff - prev_diff >= 1:
+            logger.info(f"Time of executing: {diff:.3f} sec")
+            prev_diff = diff
+        if diff > timeout:
+            return None
     
     return res_rivals
 

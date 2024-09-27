@@ -1,12 +1,22 @@
 import asyncio
 from typing import Optional
 import random
+from loguru import logger
 
 from models import *
 
 
 async def get_army_by_id(army_id: int):
     army = await Army.filter(id=army_id)
+    logger.debug(f"Army {army_id}, content: {army}")
+    if isinstance(army, list):
+        if len(army) > 1:
+            army = army[-1]
+        else:
+            army = army[0]
+    return army
+
+
     return army
 
 

@@ -16,7 +16,7 @@ from tortoise.transactions import atomic
 from tortoise import Tortoise, run_async
 from tortoise.contrib.fastapi import register_tortoise
 
-from db import *
+from database.db import DB_CONFIG
 from schemas import *
 from models import *
 from controllers import *
@@ -25,21 +25,7 @@ import crud
 
 logger.add("debug.log", format="{time} {level} {message}", level="INFO")
 
-
 app = FastAPI()
-
-# Настройка подключения к БД
-DB_CONFIG = {
-    "connections": {
-        "default": "postgres://ilshat_user:asakura2150@127.0.0.1:5432/ilshat_db"
-    },
-    "apps": {
-        "models": {
-            "models": ["models"],  # Указываем, где находятся модели
-            "default_connection": "default",
-        }
-    }
-}
 
 @app.on_event("startup")
 async def startup_event():
@@ -62,17 +48,21 @@ async def play(game: Game) -> Game:
         return game
 
     army_cnt_list = list([])
-    armies = await Army.all().order_by('id')
+    armies_list = await Army.all().order_by('id')
+    armies = dict()
+    for army in armies_list:
+        armies[army.id] = army
+
     army_in_figths = set()                   # Армии, которые находятся в бою
-    id_list = [army.id for army in armies]   # Список id армий
+    id_list = list(armies.keys())   # Список id армий
+    logger.info("Point 1")
 
     while len(armies) > 1:
         # Цикл организации сражений
-        fight_tasks = list([])
+        #fight_tasks = list([])
 
-        for i, army in enumerate(armies):
+        for id, army in armies.items():
             # Поиск соперника для армии
-
 
             if army in army_in_figths:
                 # Если армия была в бою
@@ -80,21 +70,21 @@ async def play(game: Game) -> Game:
                 if not is_exist_army:    # Проверка сущствования армии-соперника в базе
                     army_in_figths.remove(army)              # Убираем у армии метку "в бою"
 
-            id_list = [army.id for army in armies] 
-            res_match = await match_rival(i, army, id_list, army_in_figths)  # Подбор армии-соперника
+            id_list = [id for army in armies] 
+            res_match = await match_rival(id, army, id_list, army_in_figths)  # Подбор армии-соперника
             if res_match:
                 army, army_to_fight = res_match
             else:
                 continue
-            armies[i], armies[army.fight_with_id] = army, army_to_fight              # Обновляем данные об армиях
+            armies[id], armies[army.fight_with_id] = army, army_to_fight              # Обновляем данные об армиях
             army_in_figths.add(army)                                      # Помечаем армии, как "в бою"
             army_in_figths.add(army_to_fight)
-            fight_tasks.append(asyncio.create_task(fight(army, army_to_fight, game.gmap, logger, timeout=120)))
-            #w_army = await fight(army, army_to_fight, game.gmap, timeout=120)               # БИТВА!
+            #fight_tasks.append(asyncio.create_task(fight(army, army_to_fight, game.gmap, logger, timeout=120)))
+            w_army = await fight(army, army_to_fight, game.gmap, timeout=120)               # БИТВА!
         
-        done, pending = asyncio.wait(fight_tasks)
+        #done, pending = asyncio.wait(fight_tasks)
         armies = await Army.all().order_by('id')
-        fight_tasks.clear()
+        #fight_tasks.clear()
 
     win_army = await Army.all().first()
     win_units = await crud.get_army_units(win_army.id)
