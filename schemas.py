@@ -11,11 +11,13 @@ class Point(BaseModel):
     x: int
     y: int
 
+    '''
     def __add__(self, other):
         return Point(x=self.x+other.x, y=self.y+other.y)
 
     def __sub__(self, other):
         return Point(x=self.x-other.x, y=self.y-other.y)
+    '''
 
     def move(self, x: int, y: int):
         self.x += x
@@ -39,6 +41,8 @@ class BaseUnit(BaseModel):
     def validate_coord(cls, v, **kwargs):
         if not isinstance(v, Point):
             return ValueError('Неправильный тип поля')
+        else:
+            return v
 
 
     def coord_in_map(self, map1: Point):

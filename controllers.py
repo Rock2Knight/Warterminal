@@ -35,14 +35,15 @@ async def match_rival(army_id: int, army: Army, id_list: list, army_in_figths: s
     :return: tuple[Army, Army] - кортеж с армиями-соперниками
     """
 
-    fight_with = i
+    fight_with = army_id
     is_found_victim = False
     res_rivals = None
     checked_id = list([])
-    while fight_with == i and not is_found_victim:
+    while fight_with == army_id and not is_found_victim:
         fight_with = random.choice(id_list)
-        if fight_with != i:
+        if fight_with != army_id:
             army_to_fight = await crud.get_army_by_id(army_id=fight_with) # Получаем потенциальную армию-соперника
+            logger.info(f"id={army_to_fight}, type={type(army_to_fight)}")  # (1)
             if army_to_fight not in army_in_figths:
                 # Если потенциальный соперник не в бою
                 # Устанавливаем поле id соперника для каждого соперника
@@ -87,6 +88,11 @@ async def move_to(attacking_unit: AbstractUnit, victim_unit: AbstractUnit, map1:
 
 async def damage(unit1: AbstractUnit, unit2: AbstractUnit, is_crit: bool = False) -> Optional[AbstractUnit]:
     """ Логика нанесения урона юниту """
+
+    print("n\n\n")
+    logger.info(f"unit1: {unit1}, unit2: {unit2}")
+    print("n\n\n")
+
     dmg = unit1.damage
     if is_crit:
         dmg *= unit1.dmg_coef
@@ -136,7 +142,7 @@ async def delete_with_log_unit(unit: AbstractUnit, army: Army):
 
 
 
-async def fight(army1: Army, army2: Army, map1: Point, timeout: int = 1000000):
+async def fight(army1: Army, army2: Army, map1: Point, logger, timeout: int = 1000000):
     """ Тут уже сама логика битвы"""
     is_first = True
 
@@ -198,12 +204,18 @@ async def fight(army1: Army, army2: Army, map1: Point, timeout: int = 1000000):
             return
         
     if units1 and not units2:
-        army1 = await Army.filter(army1.id).first()
+        army1 = await Army.filter(id=army1.id).first()
         army1.fight_with_id = None
         await army1.save()
+        del_army = await Army.filter(id=army2.id).delete()
+        logger.info(f"Army {del_army.name} with id {del_army.id} was deleted")
+        return army1
     elif not units1 and units2:
-        army2 = await Army.filter(army2.id).first()
+        army2 = await Army.filter(id=army2.id).first()
         army2.fight_with_id = None
         await army2.save()
+        del_army = await Army.filter(id=army1.id).delete()
+        logger.info(f"Army {del_army.name} with id {del_army.id} was deleted")
+        return army2
     else:
         raise ValueError("Недействительный исход боя")

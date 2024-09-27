@@ -1,0 +1,102 @@
+{
+    "id": 1,
+    "gmap": {
+      "x": 30,
+      "y": 20
+    },
+    "army_count": 2,
+    "units_count": 14,
+    "armies": [
+      {
+        "id": 1,
+        "name": "Aliance",
+        "count": 6,
+        "units": {
+            "1": {
+                "id": 1,
+                "coord": {"x": 21, "y": 19},
+                "dto_name": "Warrior"
+            },
+            "2": {
+                "id": 2,
+                "coord": {"x": 20, "y": 3},
+                "dto_name": "Warrior"
+            },
+            "3": {
+                "id": 3,
+                "coord": {"x": 15, "y": 17},
+                "dto_name": "Archer"
+            },
+            "4": {
+                "id": 4,
+                "coord": {"x": 16, "y": 3},
+                "dto_name": "Varvar"
+            },
+            "5": {
+                "id": 5,
+                "coord": {"x": 15, "y": 6},
+                "dto_name": "Archer"
+            },
+            "6": {
+                "id": 6,
+                "coord": {"x": 14, "y": 19},
+                "dto_name": "Archer"
+            }
+        }
+      },
+      {
+        "id": 2,
+        "name": "Orda",
+        "count": 8,
+        "units": {
+            "1": {
+                "id": 1,
+                "coord": {"x": 1, "y": 19},
+                "dto_name": "Varvar"
+            },
+            "2": {
+                "id": 2,
+                "coord": {"x": 1, "y": 9},
+                "dto_name": "Varvar"
+            },
+            "3": {
+                "id": 3,
+                "coord": {"x": 1, "y": 6},
+                "dto_name": "Archer"
+            },
+            "4": {
+                "id": 4,
+                "coord": {"x": 2, "y": 2},
+                "dto_name": "Archer"
+            },
+            "5": {
+                "id": 5,
+                "coord": {"x": 2, "y": 5},
+                "dto_name": "Warrior"
+            },
+            "6": {
+                "id": 6,
+                "coord": {"x": 2, "y": 15},
+                "dto_name": "Warrior"
+            },
+            "7": {
+                "id": 7,
+                "coord": {"x": 0, "y": 18},
+                "dto_name": "Warrior"
+            },
+            "8": {
+                "id": 8,
+                "coord": {"x": 4, "y": 16},
+                "dto_name": "Warrior"
+            }
+        }
+      }
+    ],
+    "is_play": true,
+    "is_over": false,
+    "win_army": {
+      "id": 0,
+      "name": "string",
+      "loss": 0
+    }
+  }

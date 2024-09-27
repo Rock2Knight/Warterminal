@@ -4,7 +4,7 @@ from tortoise import fields
 
 class Army(Model):
     # Армия
-    id = fields.IntField(primary_key=True)
+    #id = fields.IntField(primary_key=True)
     name = fields.CharField(max_length=255)
     count = fields.IntField()
     is_fail = fields.BooleanField(default=False)
@@ -16,7 +16,7 @@ class Army(Model):
 
 class AbstractUnit(Model):
     # Абстрактный воин
-    id = fields.IntField(primary_key=True)
+    #id = fields.IntField(primary_key=True)
     army = fields.ForeignKeyField('models.Army', related_names='units')  # Войско
     health = fields.FloatField(default=100.00)
     damage = fields.FloatField(default=10.00)
