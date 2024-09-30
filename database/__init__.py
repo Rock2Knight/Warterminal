@@ -1,3 +1,5 @@
+from . import db
+
 __all__ = [
-    "models"
+    "db",
 ]

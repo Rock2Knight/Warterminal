@@ -1,27 +1,4 @@
-import random
-import sys
-import json
-import asyncio
-import math
-import time
-from contextlib import asynccontextmanager
-
-from logging import StreamHandler
-from loguru import logger
-
-from pydantic import BaseModel
-from fastapi import FastAPI
-from tortoise.exceptions import IntegrityError
-from tortoise.transactions import atomic
-from tortoise import Tortoise, run_async
-from tortoise.contrib.fastapi import register_tortoise
-
-from database.db import DB_CONFIG
-from schemas import *
-from models import *
-from controllers import *
-import crud
-
+from imports import *
 
 logger.add("debug.log", format="{time} {level} {message}", level="INFO")
 
