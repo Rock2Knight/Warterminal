@@ -4,7 +4,7 @@ import random
 from loguru import logger
 
 from models import *
-
+#from ..models import *
 
 async def get_army_by_id(army_id: int):
     army = await Army.filter(id=army_id)
@@ -25,6 +25,7 @@ async def get_army_by_id(army_id: int):
 
 
 async def get_army_units(army_id: int):
+    """ Получить всех юнитов армии """
     wariors = await Warrior.filter(army_id=army_id).order_by('id')
     archers = await Archer.filter(army_id=army_id).order_by('id')
     varvars = await Varvar.filter(army_id=army_id).order_by('id')    
@@ -36,17 +37,20 @@ async def get_army_units(army_id: int):
 
 
 async def update_army_status(army_id: int, figths_with: int):
+    """ Обновить противника армии """
     await Army.filter(id=army_id).update(fight_with_id=figths_with)
     updated_army = await Army.filter(id=army_id).first()
     return updated_army
 
 
 async def is_exist_army(army_id: int):
+    """ Проверить существует ли армия """
     exists = await Army.filter(id=army_id).exists()
     return bool(exists)
 
 
 async def get_free_armies(army_id: int) -> Optional[list[Army]]:
+    """ Получить все армии, которые сейчас не в бою """
     armies = await Army.all()
     if armies is None:
         return None
@@ -58,26 +62,3 @@ async def get_free_armies(army_id: int) -> Optional[list[Army]]:
             break
     new_armies.pop(i) 
     return new_armies
-
-async def get_concrete_unit(unit: AbstractUnit) -> AbstractUnit:
-    if isinstance(unit, Warrior):
-        res_unit = await Warrior.filter(id=unit.id).first()
-        return res_unit
-    elif isinstance(unit, Archer):
-        res_unit = await Archer.filter(id=unit.id).first()
-        return res_unit
-    elif isinstance(unit, Varvar):
-        res_unit = await Varvar.filter(id=unit.id).first()
-        return res_unit
-    else:
-        raise ValueError(f"Unknown unit type: {type(unit)}")
-
-async def delete_unit(unit: AbstractUnit):
-    if isinstance(unit, Warrior):
-        await Warrior.filter(id=unit.id).delete()
-    elif isinstance(unit, Archer):
-        await Archer.filter(id=unit.id).delete()
-    elif isinstance(unit, Varvar):
-        await Varvar.filter(id=unit.id).delete()
-    else:
-        raise ValueError(f"Unknown unit type: {type(unit)}")

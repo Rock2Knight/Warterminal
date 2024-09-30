@@ -22,8 +22,6 @@ DB_CONFIG = {
     }
 }
 
-print(DB_CONFIG)
-
 '''
 async def init():
     # Настройки БД

@@ -11,14 +11,6 @@ class Point(BaseModel):
     x: int
     y: int
 
-    '''
-    def __add__(self, other):
-        return Point(x=self.x+other.x, y=self.y+other.y)
-
-    def __sub__(self, other):
-        return Point(x=self.x-other.x, y=self.y-other.y)
-    '''
-
     def move(self, x: int, y: int):
         self.x += x
         self.y += y
@@ -45,72 +37,6 @@ class BaseUnit(BaseModel):
             return v
 
 
-    def coord_in_map(self, map1: Point):
-        if self.coord.x < 0:
-            self.coord.x = 1
-        elif self.coord.x > map1.x:
-            self.coord.x = map1.x - 1
-        if self.coord.y < 0:
-            self.coord.y = 1
-        elif self.coord.y > map1.y:
-            self.coord.y = map1.y - 1
-     
-
-    def damaged(self, damage: float) -> int:
-        if self.health > 0:
-            if self.defense > 0:
-                self.health = self.health - (damage - self.defense)
-                self.defense -= 2
-            else:
-                self.health -= damage
-        if self.health <= 0:
-            return self.id
-        return -1
-
-    def __str__(self):
-        return str(self.id)
-
-
-    async def attack(self, map1: Point, unit):
-        dist = unit.coord - self.coord
-        in_radius = abs(dist.x) < self.radius_dmg and abs(dist.y) < self.radius_dmg
-        if not in_radius:
-            self.move_to(unit, map1, 2)
-            dist = unit.coord - self.coord
-        if abs(dist.x) < self.radius_dmg and abs(dist.y) < self.radius_dmg:
-            p = random.choice(list(range(5)))
-            match p:
-                case 0 | 1: return None
-                case 2 | 3: return unit.damaged(self.damage)
-                case 4:
-                    damage = self.damage * self.dmg_coef
-                    return unit.damaged(damage)
-
-
-    def move_to(self, unit, map1: Point, speed: int = 1):
-        p_move = random.random()
-        x_move, y_move = False, False
-        if abs(unit.coord.x - self.coord.x) > abs(unit.coord.y - self.coord.y):
-            x_move = True
-        else:
-            y_move = True
-
-        p_move = random.random()
-        if x_move:
-            if unit.coord.x < self.coord.x:
-                self.coord.x = self.coord.x - 2 * speed
-            else:
-                self.coord.x = self.coord.x + 2 * speed
-        else:
-            if unit.coord.y < self.coord.y:
-                self.coord.y = self.coord.y - 2 * speed
-            else:
-                self.coord.y = self.coord.y + 2 * speed
-
-        self.coord_in_map(map1)
-
-
-
 class WarriorDto(BaseUnit):
     radius_dmg: int = 10
     base_speed: int = 2
@@ -125,14 +51,14 @@ class ArcherDto(BaseUnit):
     dto_name: str = "Archer"
 
 
-class Varvar(BaseUnit):
+class VarvarDto(BaseUnit):
     radius_dmg: int = 8
     base_speed: int = 2
     dmg_coef: float = 2.5
     dto_name: str = "Varvar"
 
 
-class ArmyBase(BaseModel):
+class ArmyDto(BaseModel):
     id: int
     name: str
     count: int
@@ -167,7 +93,7 @@ class Game(BaseModel):
     gmap: Point          # карта
     army_count: int
     units_count: int
-    armies: list[ArmyBase]
+    armies: list[ArmyDto]
     is_play: bool = True
     is_over: bool = False
     win_army: ArmyStatBase
@@ -179,6 +105,3 @@ class AbstractAttackDto(BaseModel):
     radius_dmg: conint(ge=1)
     base_speed: conint(ge=1)
     dmg_coef: confloat(ge=1.0)
-
-class AttackDto(AbstractAttackDto):
-    pass

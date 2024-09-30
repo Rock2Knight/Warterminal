@@ -25,7 +25,7 @@ async def coord_in_map(unit: AbstractUnit, map1: Point) -> AbstractUnit:
     return unit
 
 
-async def match_rival(army_id: int, army: Army, id_list: list, army_in_figths: set, timeout: int = 10) -> Optional[tuple[Army]]:
+async def match_rival(army_id: int, army: Army, id_list: list, army_in_figths: set, timeout: int = 3) -> Optional[tuple[Army]]:
     """ 
     Подбор армии-соперника
     :param army_id:  id армии, для которой подбираем соперника
@@ -43,12 +43,18 @@ async def match_rival(army_id: int, army: Army, id_list: list, army_in_figths: s
     t1 = time.perf_counter()
     t2 = time.perf_counter()
     prev_diff = t2 - t1
-    while fight_with == army_id and not is_found_victim:
-        fight_with = random.choice(id_list)
-        if fight_with != army_id:
+    while fight_with == army_id and not is_found_victim:   # Пока жертва не найдена
+        fight_with = random.choice(id_list)                # Выбираем случайную армию-соперника
+
+        army_debug1 = await crud.get_army_by_id(army_id=fight_with)  # Армия, для которой мы подбираем противника
+        army_debug2 = await crud.get_army_by_id(army_id=fight_with)  # Потенциальный противник
+        logger.info(f"id={army_debug1.id}, content={dict(army_debug1)}")
+        logger.info(f"id={army_debug2.id}, content={dict(army_debug2)}")
+
+        if fight_with != army_id:                          # Если мы не выбрали нашу армию
             logger.info("Before get army by id")
             army_to_fight = await crud.get_army_by_id(army_id=fight_with) # Получаем потенциальную армию-соперника
-            logger.info(f"id={army_to_fight}, type={type(army_to_fight)}")  # (1)
+            logger.info(f"id={army_to_fight.id}, name={army_to_fight.name} type={type(army_to_fight)}")  # (1)
             if army_to_fight not in army_in_figths:
                 # Если потенциальный соперник не в бою
                 # Устанавливаем поле id соперника для каждого соперника
