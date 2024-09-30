@@ -22,20 +22,21 @@ DB_CONFIG = {
     }
 }
 
-'''
+
 async def init():
     # Настройки БД
+    '''
     await Tortoise.init(
         config={
             "connections": {
                 "default": {
                     "engine": "tortoise.backends.asyncpg",
                     "credentials": {
-                        "database": db_config.db_name,
-                        "host": db_config.host,
-                        "password": db_config.password,
-                        "port": db_config.port,
-                        "user": db_config.user
+                        "database": config['db_name'],
+                        "host": config['host'],
+                        "password": config['password'],
+                        "port": config['port'],
+                        "user": config['user']
                     }
                 }
             },
@@ -47,6 +48,11 @@ async def init():
             },
         }
     )
+    '''
+    await Tortoise.init(config = DB_CONFIG)
     # Генерация схемы
     await Tortoise.generate_schemas()
-'''
+
+
+if __name__ == "__main__":
+    run_async(init())
