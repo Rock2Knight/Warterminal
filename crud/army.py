@@ -18,8 +18,6 @@ async def get_army_by_id(army_id: int):
             army = army[-1]
         else:
             army = army[0]
-    return army
-
 
     return army
 
@@ -43,7 +41,7 @@ async def update_army_status(army_id: int, figths_with: int):
     return updated_army
 
 
-async def is_exist_army(army_id: int):
+async def is_exist_army(army_id: int) -> bool:
     """ Проверить существует ли армия """
     exists = await Army.filter(id=army_id).exists()
     return bool(exists)

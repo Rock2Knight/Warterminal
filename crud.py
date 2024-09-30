@@ -21,9 +21,6 @@ async def get_army_by_id(army_id: int):
     return army
 
 
-    return army
-
-
 async def get_army_units(army_id: int):
     wariors = await Warrior.filter(army_id=army_id).order_by('id')
     archers = await Archer.filter(army_id=army_id).order_by('id')

@@ -6,7 +6,6 @@ from loaders.model_loader import ModelLoader
 
 class Army(ModelLoader):
     # Армия
-    #id = fields.IntField(primary_key=True)
     name = fields.CharField(max_length=255)
     count = fields.IntField()
     is_fail = fields.BooleanField(default=False)
@@ -18,7 +17,6 @@ class Army(ModelLoader):
 
 class AbstractUnit(ModelLoader):
     # Абстрактный воин
-    #id = fields.IntField(primary_key=True)
     army = fields.ForeignKeyField('models.Army', related_names='units')  # Войско
     health = fields.FloatField(default=100.00, null=True)
     damage = fields.FloatField(default=10.00, null=True)

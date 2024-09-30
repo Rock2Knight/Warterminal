@@ -1,4 +1,3 @@
-from configparser import ConfigParser
 import json
 
 from loguru import logger
