@@ -1,25 +1,21 @@
 from loguru import logger
 
-from model_loader import AbstractModel
+from loaders.model_loader import ModelLoader
 
-class GameLoader(AbstractModel):
+class GameLoader(ModelLoader):
 
-    @staticmethod
-    async def get():
+    @classmethod
+    async def create(cls, **kwargs):
         pass
+        
+    @classmethod
+    async def update(cls, **kwargs):
+        match kwargs['method']:
+            case 'put':
+                pass
+            case 'patch':
+                pass
 
-    @staticmethod
-    async def post():
-        pass
-
-    @staticmethod
-    async def put():
-        pass
-
-    @staticmethod
-    async def delete():
-        pass
-
-    @staticmethod
-    async def patch():
+    @classmethod
+    async def delete(cls, **kwargs):
         pass

@@ -18,7 +18,6 @@ class Point(BaseModel):
 class BaseUnit:
 
     class BaseUnitCreate(BaseModel):
-        id: int
         health: confloat(ge=100.0) = 100.00
         damage: confloat(ge=10.0) = 10.0
         defense: confloat(ge=50.0) = 50

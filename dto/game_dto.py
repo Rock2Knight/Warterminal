@@ -1,7 +1,9 @@
+from typing import Optional
+
 from pydantic import BaseModel, confloat, conint
 
-from base_schema import Point, BaseUnit
-from army_dto import ArmyDto
+from .base_schema import Point, BaseUnit
+from .army_dto import ArmyDto
 
 class ArmyStatBase(BaseModel):
     # Статистика по армии
@@ -17,7 +19,7 @@ class Game(BaseModel):
     armies: list[ArmyDto.Create]
     is_play: bool = True
     is_over: bool = False
-    win_army: ArmyStatBase
+    win_army: Optional[ArmyStatBase] = None
     
 class AbstractAttackDto(BaseModel):
     moving: Point

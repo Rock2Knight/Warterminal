@@ -4,7 +4,7 @@ from typing import Optional
 
 from pydantic import BaseModel, validator, confloat, conint
 
-from base_schema import Point, BaseUnit
+from .base_schema import Point, BaseUnit
 
 class ArmyDto:
 
@@ -12,13 +12,13 @@ class ArmyDto:
         id: int
         name: str
         count: int
-        units: dict[int, BaseUnit] = dict()
+        units: dict[int, BaseUnit.BaseUnitCreate] = dict()
 
     class Update(BaseModel):
         id: int
         name: Optional[str]
         count: Optional[int]
-        units: Optional[dict[int, BaseUnit]]
+        units: Optional[dict[int, BaseUnit.BaseUnitUpdate]]
 
     '''
     def add_unit(self, count: int, voins: list[BaseUnit]):

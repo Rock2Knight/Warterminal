@@ -1,11 +1,21 @@
-from ..schemas import VarvarDto
+from loguru import logger
 
-async def varvar_game(method: str, varvar: VarvarDto):
-    match method:
+from dto.varvar_dto import VarvarDto
+from loaders.varvar import VarvarLoader
+
+GenericVarvarDto = VarvarDto.Create | VarvarDto.Update | VarvarDto.UpdatePart
+
+async def access_varvar(**kwargs):
+    match kwargs['method']:
         case "get":
             pass
         case "post":
-            pass
+            if isinstance(kwargs['dto'], VarvarDto.Create): 
+                logger.info(f"Varvar DTO {kwargs['dto']} передан в access, POST")
+                return await VarvarLoader.create(army_id=kwargs['army_id'], dto=kwargs['dto'])
+            else:
+                logger.error(f"Invalid DTO {kwargs['dto']}")
+                raise ValueError("Invalid DTO")
         case "put":
             pass
         case "delete":

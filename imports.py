@@ -18,12 +18,20 @@ from tortoise.contrib.fastapi import register_tortoise
 
 from database.db import DB_CONFIG
 
+from access.archer import access_archer
+from access.army import access_army
+from access.game import access_game
+from access.warrior import access_warrior
+from access.varvar import access_varvar
+
 from dto.game_dto import *
 from dto.army_dto import ArmyDto
 from dto.warrior_dto import WarriorDto
 from dto.archer_dto import ArcherDto
 from dto.varvar_dto import VarvarDto
 
+from views.fight import Fight
+
 from models import *
-from controllers import *
+#from controllers import *
 import crud

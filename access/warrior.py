@@ -1,11 +1,21 @@
-from ..schemas import WarriorDto
+from loguru import logger
 
-async def warrior_game(method: str, warrior: WarriorDto):
-    match method:
+from dto.warrior_dto import WarriorDto
+from loaders.warrior import WarriorLoader
+
+GenericWarriorDto = WarriorDto.Create | WarriorDto.Update | WarriorDto.UpdatePart
+
+async def access_warrior(**kwargs):
+    match kwargs['method']:
         case "get":
             pass
         case "post":
-            pass
+            if isinstance(kwargs['dto'], WarriorDto.Create): 
+                logger.info(f"Warrior DTO {kwargs['dto']} передан в access, POST")
+                return await WarriorLoader.create(army_id=kwargs['army_id'], dto=kwargs['dto'])
+            else:
+                logger.error(f"Invalid DTO {kwargs['dto']}")
+                raise ValueError("Invalid DTO")
         case "put":
             pass
         case "delete":

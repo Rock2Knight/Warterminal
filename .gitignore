@@ -1,6 +1,13 @@
 /.venv
 /debug.log
 /res_data.json
-/test*
 /.idea
 /__pycache__ */
+/__pycache__
+/.pytest_cache
+/**/__pycache__
+/random_coord_copy.json
+/gen_coords.py
+/example_wait.py
+/cache*
+/database/__pycache__

@@ -1,12 +1,12 @@
-import asyncio
 from typing import Optional, Any
-import random
 
 from loguru import logger
 
 from dto.base_schema import BaseUnit
 from dto.warrior_dto import WarriorDto
 from models import *
+
+from .exceptions import *
 
 
 async def get_warrior(warrior_id: int) -> Optional[Warrior]:
@@ -30,7 +30,7 @@ async def create_warrior(army_id: int, warrior_create_dto: WarriorDto.Create) ->
         return warrior
     except Exception as e:
         logger.error(f"Error while creating warrior: {e}")
-        raise e
+        raise CreateModelException(f"Error while creating warrior: {e}")
 
 
 async def _update_warrior(warrior: Warrior, attr: str, value: Any) -> Warrior:
@@ -54,59 +54,47 @@ async def _update_warrior(warrior: Warrior, attr: str, value: Any) -> Warrior:
 
 
 
-async def update_full_warrior(warrior_id: int, **kwargs) -> Warrior:
+async def update_full_warrior(update_dto: WarriorDto.Update) -> Warrior:
     """ Реализация PUT-запроса """
-    warrior = await get_warrior(warrior_id)
-    warrior_dict = await warrior.values_dict(fk_fields=True)
-    
-    attrs = [attr for attr, value in warrior_dict.items()]
-    attrs_updated = list([])
-    attrs_non_updated = list([])
+    warrior = await get_warrior(update_dto.id)
+    update_dict = update_dto.model_dump()
 
-    for attr, value in kwargs.items():
-        if hasattr(warrior, attr):
-            attrs_updated.append(attr)
-            setattr(warrior, attr, value)
-        else:
-            logger.error(f"Invalid attribute: {attr}")
-            raise Exception(f"Invalid attribute: {attr}")
-        
-    attrs_non_updated = list(set(attrs) - set(attrs_updated))
+    try:
+        new_warrior = Warrior(army_id=warrior.army_id, **update_dict)
+        await new_warrior.save()
+        return new_warrior
+    except Exception as e:
+        raise UpdateModelException
 
-    for attr in attrs_non_updated:
-        if hasattr(warrior, attr):
-            attrs_updated.append(attr)
-            setattr(warrior, attr, None)
-        else:
-            logger.error(f"Invalid attribute: {attr}")
-            raise Exception(f"Invalid attribute: {attr}")
 
-    await warrior.save()
-    return warrior
-
-async def update_full_warrior(warrior_id: int, **kwargs) -> Warrior:
+async def update_part_warrior(update_dto: WarriorDto.UpdatePart) -> Warrior:
     """ Реализация PATCH-запроса """
-    warrior = await get_warrior(warrior_id)
+    warrior = await get_warrior(update_dto.id)
     warrior_dict = await warrior.values_dict(fk_fields=True)
+    update_dict = update_dto.model_dump()
     
     attrs = [attr for attr, value in warrior_dict.items()]
     attrs_updated = list([])
     attrs_non_updated = list([])
 
-    for attr, value in kwargs.items():
-        if hasattr(warrior, attr):
+    for attr, value in update_dict.items():
+        if hasattr(warrior, attr) and value is not None:
             warrior = await _update_warrior(warrior, attr, value)
         else:
             logger.error(f"Invalid attribute: {attr}")
-            raise Exception(f"Invalid attribute: {attr}")
+            raise UpdateModelException(f"Invalid attribute: {attr}")
     
-    warrior = await get_warrior(warrior_id)
+    warrior = await get_warrior(update_dto.id)
     return warrior
 
-async def delete_warrior(warrior_id: int) -> bool:
+async def delete_warrior(warrior_id: int):
     """ Реализация DELETE-запроса """
     warrior = await get_warrior(warrior_id)
     if warrior is None:
-        return True
-    await Warrior.filter(id=warrior_id).delete()
-    return True
+        return
+    
+    try:
+        await Warrior.filter(id=warrior_id).delete()
+    except Exception as e:
+        logger.error(f"Error while deleting warrior: {e}")
+        raise DeleteModelException(f"Error while deleting warrior: {e}")
