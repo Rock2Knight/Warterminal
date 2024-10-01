@@ -1,3 +1,5 @@
+import asyncio
+
 from loguru import logger
 
 from access.warrior import access_warrior
@@ -19,22 +21,29 @@ class ArmyLoader(ModelLoader):
 
     @classmethod
     async def create(cls, **kwargs):
-        army_dump = kwargs['army_dump'].model_dump()
-        await create_army(army_dump['name'], army_dump['count'])
+        try:
+            task = list[asyncio.create_task(create_army(kwargs['army_dto_create'].name, kwargs['army_dto_create'].count))]
+            done, pending = await asyncio.wait(task)
+            while not pending:
+                a = 1
+            for future in done.result():
+                print(future)
+        except Exception as e:
+            logger.error(f"Within creating army: {e}")
 
-        for unit in army_dump['units'].values():
+        for unit in kwargs['army_dto_create'].units.values():
             unit_dump = {'dto': None, 'method': 'post'}
             if isinstance(unit, WarriorDto.Create):
                 unit_dump['dto'] = unit
-                unit_dump['army_id'] = army_dump['id']
+                unit_dump['army_id'] = kwargs['army_dto_create'].id
                 await access_warrior(**unit_dump)
             elif isinstance(unit, ArcherDto.Create):
                 unit_dump['dto'] = unit
-                unit_dump['army_id'] = army_dump['id']
+                unit_dump['army_id'] = kwargs['army_dto_create'].id
                 await access_archer(**unit_dump)
             elif isinstance(unit, VarvarDto.Create):
                 unit_dump['dto'] = unit
-                unit_dump['army_id'] = army_dump['id']
+                unit_dump['army_id'] = kwargs['army_dto_create'].id
                 await access_varvar(**unit_dump)
 
 

@@ -21,7 +21,12 @@ async def shutdown_event():
 
 
 @app.post("/game/{army_count}/{units_count}")
-async def start_game(army_count: int, units_count: int, game: Game):
+async def start_game(army_count: int, units_count: int, game: Game, response: Response):
 
     game_result = await Fight.init_fight(game)  # Запускаем игру
-    return game_result.model_dump()
+    if isinstance(game_result, Game):
+        response.status_code = status.HTTP_201_CREATED
+        return game_result.model_dump()
+    else:
+        response.status_code = status.HTTP_503_SERVICE_UNAVAILABLE
+        return game_result     # Если возникла ошибка

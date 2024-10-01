@@ -5,6 +5,7 @@ from typing import Optional
 
 from loguru import logger
 from tortoise.exceptions import IntegrityError
+from fastapi.exceptions import HTTPException
 
 from .imports import *
 
@@ -244,6 +245,7 @@ class Fight:
             await access_game(method='post', game=game) # Загружаем данные игры
         except Exception as e:
             logger.error(f"Ошибка при загрузке данных игры: \n{e}")
+            return HTTPException(status_code=503, detail="Game cannot be initialized")
             # Здесь должна быть обработка исключения
             # или выбрасывается кастомное исключение (код ошибки)
 

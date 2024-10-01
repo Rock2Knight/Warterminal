@@ -14,7 +14,6 @@ async def access_game(method: str, game: Game):
         case "post":
             for army in game.armies:                  # army - экземпляр типа ArmyDto.Create
                 game_dump['army_dto'] = army
-                logger.debug(f"Информация об игре: \{game_dump}\n\n")
                 await access_army(**game_dump)
         case "put", "patch":
             pass

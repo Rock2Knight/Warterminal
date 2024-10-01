@@ -1,4 +1,5 @@
 /.venv
+/venv
 /debug.log
 /res_data.json
 /.idea
@@ -11,3 +12,4 @@
 /example_wait.py
 /cache*
 /database/__pycache__
+/test_request_body.json

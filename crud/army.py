@@ -9,7 +9,10 @@ from .exceptions import *
 
 async def create_army(name: str, count: int, is_failed: bool = False, 
             fight_with: Optional[int]=None) -> Army:
-    army = await Army.create(name=name, count=count, is_failed=is_failed, fight_with_id=fight_with)
+    #army = await Army.create(name=name, count=count, is_failed=is_failed, fight_with_id=fight_with)
+    army = Army(name=name, count=count, is_failed=is_failed, fight_with_id=fight_with)
+    logger.debug(f"Army object: {army}")
+    await army.save()
     return army
 
 
