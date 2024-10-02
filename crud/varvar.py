@@ -13,6 +13,16 @@ async def get_varvar(varvar_id: int) -> Optional[Varvar]:
 
 async def create_varvar(army_id: int, varvar_create_dto: VarvarDto.Create) -> Varvar:
 
+    ##################################
+    all_varvars = await Varvar.all().order_by('id')
+    if all_varvars:
+        for varvar in all_varvars:
+            logger.debug(f"{await varvar.values_dict(fk_fields=True)}")
+    else:
+        logger.debug("No varvars found")
+
+    ##################################
+
     try:
         varvar = Varvar(
             army_id=army_id,
@@ -59,34 +69,34 @@ async def update_full_varvar(update_dto: VarvarDto.Update) -> Varvar:
     update_dict = update_dto.model_dump()
 
     try:
-        new_varvar = Varvar(army_id=varvar.army_id, **update_dict)
-        await new_varvar.save()
-        return new_varvar
+        for attr, value in update_dict.items():
+            if attr == 'coord':
+                varvar = await _update_varvar(varvar, "x_coord", value.x)
+                varvar = await _update_varvar(varvar, "y_coord", value.y)
+            else:
+                varvar = await _update_varvar(varvar, attr, value)
+        return varvar
     except Exception as e:
-        logger.error(f"Error while updating varvar: {e}")
-        raise UpdateModelException(f"Error while updating varvar: {e}")
+        raise UpdateModelException
 
 
 
 async def update_part_varvar(update_dto: VarvarDto.UpdatePart) -> Varvar:
     """ Реализация PATCH-запроса """
     varvar = await get_varvar(update_dto.id)
-    varvar_dict = await varvar.values_dict(fk_fields=True)
     update_dict = update_dto.model_dump()
-    
-    attrs = [attr for attr, value in varvar_dict.items()]
-    attrs_updated = list([])
-    attrs_non_updated = list([])
 
-    for attr, value in update_dict.items():
-        if hasattr(varvar, attr) and value is not None:
-            varvar = await _update_varvar(varvar, attr, value)
-        else:
-            logger.error(f"Invalid attribute: {attr}")
-            raise UpdateModelException(f"Invalid attribute: {attr}")
-    
-    varvar = await get_varvar(update_dto.id)
-    return varvar
+    try:
+        for attr, value in update_dict.items():
+            if value is not None:
+                if attr == 'coord':
+                    varvar = await _update_varvar(varvar, "x_coord", value.x)
+                    varvar = await _update_varvar(varvar, "y_coord", value.y)
+                else:
+                    varvar = await _update_varvar(varvar, attr, value)
+        return varvar
+    except Exception as e:
+        raise UpdateModelException
 
 async def delete_varvar(varvar_id: int):
     """ Реализация DELETE-запроса """

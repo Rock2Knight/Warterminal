@@ -12,7 +12,19 @@ from .exceptions import *
 async def get_warrior(warrior_id: int) -> Optional[Warrior]:
     return await Warrior.get_or_none(id=warrior_id)
 
+
 async def create_warrior(army_id: int, warrior_create_dto: WarriorDto.Create) -> Warrior:
+
+    ##################################
+    all_warriors = await Warrior.all().order_by('id')
+    if all_warriors:
+        for warrior in all_warriors:
+            logger.debug(f"{await warrior.values_dict(fk_fields=True)}")
+    else:
+        logger.debug("No warriors found")
+
+    ##################################
+
 
     try:
         warrior = Warrior(
@@ -60,32 +72,34 @@ async def update_full_warrior(update_dto: WarriorDto.Update) -> Warrior:
     update_dict = update_dto.model_dump()
 
     try:
-        new_warrior = Warrior(army_id=warrior.army_id, **update_dict)
-        await new_warrior.save()
-        return new_warrior
+        for attr, value in update_dict.items():
+            if attr == 'coord':
+                warrior = await _update_warrior(warrior, "x_coord", value.x)
+                warrior = await _update_warrior(warrior, "y_coord", value.y)
+            else:
+                warrior = await _update_warrior(warrior, attr, value)
+        return warrior
     except Exception as e:
         raise UpdateModelException
 
 
-async def update_part_warrior(update_dto: WarriorDto.UpdatePart) -> Warrior:
+async def update_part_warrior(update_dto: WarriorDto.Update) -> Warrior:
     """ Реализация PATCH-запроса """
     warrior = await get_warrior(update_dto.id)
-    warrior_dict = await warrior.values_dict(fk_fields=True)
     update_dict = update_dto.model_dump()
-    
-    attrs = [attr for attr, value in warrior_dict.items()]
-    attrs_updated = list([])
-    attrs_non_updated = list([])
 
-    for attr, value in update_dict.items():
-        if hasattr(warrior, attr) and value is not None:
-            warrior = await _update_warrior(warrior, attr, value)
-        else:
-            logger.error(f"Invalid attribute: {attr}")
-            raise UpdateModelException(f"Invalid attribute: {attr}")
+    try:
+        for attr, value in update_dict.items():
+            if value is not None:
+                if attr == 'coord':
+                    warrior = await _update_warrior(warrior, "x_coord", value.x)
+                    warrior = await _update_warrior(warrior, "y_coord", value.y)
+                else:
+                    warrior = await _update_warrior(warrior, attr, value)
+        return warrior
+    except Exception as e:
+        raise UpdateModelException
     
-    warrior = await get_warrior(update_dto.id)
-    return warrior
 
 async def delete_warrior(warrior_id: int):
     """ Реализация DELETE-запроса """

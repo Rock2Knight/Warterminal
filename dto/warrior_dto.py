@@ -12,13 +12,7 @@ class WarriorDto:
         dmg_coef: float = 1.5
         dto_name: str = "Warrior"
 
-    class Update(BaseUnit.BaseUnitUpdate):
-        radius_dmg: int = 10
-        base_speed: int = 2
-        dmg_coef: float = 1.5
-        dto_name: str = "Warrior"
-
-    class UpdatePart(BaseModel):
+    class Update(BaseModel):
         id: int
         health: Optional[confloat(ge=100.0)] = None
         damage: Optional[confloat(ge=10.0)] = None

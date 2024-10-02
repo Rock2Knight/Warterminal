@@ -9,6 +9,14 @@ from .exceptions import *
 
 async def create_army(name: str, count: int, is_failed: bool = False, 
             fight_with: Optional[int]=None) -> Army:
+    ##################################
+    all_armies = await Army.all().order_by('id')
+    if all_armies:
+        for army in all_armies:
+            logger.debug(f"{await army.values_dict()}")
+    else:
+        logger.debug(f"No armies in db")
+    ##################################
     army = await Army.create(name=name, count=count, is_failed=is_failed, fight_with_id=fight_with)
     return army
 
@@ -49,7 +57,27 @@ async def update_army_status(army_id: int, figths_with: int) -> Army:
         return updated_army
     except Exception as e:
         logger.error(f"Ошибка при обновлении армии {army_id}: {e}")
-        return UpdateModelException(f"Ошибка при обновлении армии {army_id}")
+        raise UpdateModelException(f"Ошибка при обновлении армии {army_id}")
+    
+async def update_army_name(army_id: int, name: str) -> Army:
+    """ Изменить название армии """
+    try:
+        await Army.filter(id=army_id).update(name=name)
+        updated_army = await Army.filter(id=army_id).first()
+        return updated_army
+    except Exception as e:
+        logger.error(f"Ошибка при обновлении имени армии {army_id}")
+        raise UpdateModelException(f"Ошибка при обновлении имени армии {army_id}")
+    
+async def update_army_units_count(army_id: int, count: int) -> Army:
+    """ Изменить начальное количество юнитов армии """
+    try:
+        await Army.filter(id=army_id).update(count=count)
+        updated_army = await Army.filter(id=army_id).first()
+        return updated_army
+    except Exception as e:
+        logger.error(f"Ошибка при обновлении количества юнитов армии {army_id}")
+        raise UpdateModelException(f"Ошибка при обновлении количества юнитов армии {army_id}")
 
 
 
@@ -72,3 +100,14 @@ async def get_free_armies(army_id: int) -> Optional[list[Army]]:
             break
     new_armies.pop(i) 
     return new_armies
+
+async def delete_army(army_id: int):
+    army = await get_army_by_id(army_id)
+    if army is None:
+        return
+    
+    try:
+        await Army.filter(id=army_id).delete()
+    except Exception as e:
+        logger.error(f"Error while deleting army: {e}")
+        raise DeleteModelException(f"Error while deleting army: {e}")

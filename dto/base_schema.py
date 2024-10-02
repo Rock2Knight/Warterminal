@@ -29,13 +29,13 @@ class BaseUnit:
 
     class BaseUnitUpdate(BaseModel):
         id: int
-        health: confloat(ge=100.0) = 100.00
-        damage: confloat(ge=10.0) = 10.0
-        defense: confloat(ge=50.0) = 50
+        health: Optional[confloat(ge=100.0)] = None
+        damage: Optional[confloat(ge=10.0)] = None
+        defense: Optional[confloat(ge=50.0)] = None
         coord: Optional[Point] = None
-        radius_dmg: conint(ge=1) = 10
-        base_speed: int = 2
-        dmg_coef: float = 1.5
+        radius_dmg: Optional[conint(ge=1)] = None
+        base_speed: Optional[int] = None
+        dmg_coef: Optional[float] = None
 
 '''
 class BaseUnit(BaseModel):

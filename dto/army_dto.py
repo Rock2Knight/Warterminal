@@ -19,9 +19,9 @@ class ArmyDto:
 
     class Update(BaseModel):
         id: int
-        name: Optional[str]
-        count: Optional[int]
-        units: Optional[dict[int, WarriorDto.Update | VarvarDto.Update | ArcherDto.Update]]
+        name: Optional[str] = None
+        count: Optional[int] = None
+        units: Optional[dict[int, WarriorDto.Update | VarvarDto.Update | ArcherDto.Update]] = None
 
     '''
     def add_unit(self, count: int, voins: list[BaseUnit]):

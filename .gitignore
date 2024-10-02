@@ -13,3 +13,4 @@
 /cache*
 /database/__pycache__
 /test_request_body.json
+/debug*.log

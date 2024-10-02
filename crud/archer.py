@@ -13,6 +13,16 @@ async def get_archer(archer_id: int) -> Optional[Archer]:
 
 async def create_archer(army_id: int, archer_create_dto: ArcherDto.Create) -> Archer:
 
+    ##################################
+    all_archers = await Archer.all().order_by('id')
+    if all_archers:
+        for archer in all_archers:
+            logger.debug(f"{await archer.values_dict(fk_fields=True)}")
+    else:
+        logger.debug("No archers found")
+
+    ##################################
+
     try:
         archer = Archer(
             army_id=army_id,
@@ -59,33 +69,33 @@ async def update_full_archer(update_dto: ArcherDto.Update) -> Archer:
     update_dict = update_dto.model_dump()
 
     try:
-        new_archer = Archer(army_id=archer.army_id, **update_dict)
-        await new_archer.save()
-        return new_archer
+        for attr, value in update_dict.items():
+            if attr == 'coord':
+                archer = await _update_archer(archer, "x_coord", value.x)
+                archer = await _update_archer(archer, "y_coord", value.y)
+            else:
+                archer = await _update_archer(archer, attr, value)
+        return archer
     except Exception as e:
-        logger.error(f"Error while updating archer: {e}")
-        raise UpdateModelException(f"Error while updating archer: {e}")
+        raise UpdateModelException
 
 
-async def update_part_archer(update_dto: ArcherDto.UpdatePart) -> Archer:
+async def update_part_archer(update_dto: ArcherDto.Update) -> Archer:
     """ Реализация PATCH-запроса """
     archer = await get_archer(update_dto.id)
-    archer_dict = await archer.values_dict(fk_fields=True)
     update_dict = update_dto.model_dump()
-    
-    attrs = [attr for attr, value in archer_dict.items()]
-    attrs_updated = list([])
-    attrs_non_updated = list([])
 
-    for attr, value in update_dict.items():
-        if hasattr(archer, attr) and value is not None:
-            archer = await _update_archer(archer, attr, value)
-        else:
-            logger.error(f"Invalid attribute: {attr}")
-            raise UpdateModelException(f"Invalid attribute: {attr}")
-    
-    archer = await get_archer(update_dto.id)
-    return archer
+    try:
+        for attr, value in update_dict.items():
+            if value is not None:
+                if attr == 'coord':
+                    archer = await _update_archer(archer, "x_coord", value.x)
+                    archer = await _update_archer(archer, "y_coord", value.y)
+                else:
+                    archer = await _update_archer(archer, attr, value)
+        return archer
+    except Exception as e:
+        raise UpdateModelException
 
 async def delete_archer(archer_id: int):
     """ Реализация DELETE-запроса """

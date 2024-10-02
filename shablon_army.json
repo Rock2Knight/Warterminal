@@ -1,0 +1,37 @@
+{
+    "id": 1,
+    "name": "Aliance",
+    "count": 6,
+    "units": {
+        "1": {
+            "id": 1,
+            "coord": {"x": 21, "y": 19},
+            "dto_name": "Warrior"
+        },
+        "2": {
+            "id": 2,
+            "coord": {"x": 20, "y": 3},
+            "dto_name": "Warrior"
+        },
+        "3": {
+            "id": 3,
+            "coord": {"x": 15, "y": 17},
+            "dto_name": "Archer"
+        },
+        "4": {
+            "id": 4,
+            "coord": {"x": 16, "y": 3},
+            "dto_name": "Varvar"
+        },
+        "5": {
+            "id": 5,
+            "coord": {"x": 15, "y": 6},
+            "dto_name": "Archer"
+        },
+        "6": {
+            "id": 6,
+            "coord": {"x": 14, "y": 19},
+            "dto_name": "Archer"
+        }
+    }
+  }

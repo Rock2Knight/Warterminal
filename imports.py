@@ -26,6 +26,7 @@ from access.game import access_game
 from access.warrior import access_warrior
 from access.varvar import access_varvar
 
+from dto.base_schema import Point
 from dto.game_dto import *
 from dto.army_dto import ArmyDto
 from dto.warrior_dto import WarriorDto
