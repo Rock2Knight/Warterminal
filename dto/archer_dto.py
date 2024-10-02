@@ -13,12 +13,6 @@ class ArcherDto:
         dto_name: str = "Archer"
 
     class Update(BaseUnit.BaseUnitUpdate):
-        radius_dmg: int = 20
-        base_speed: int = 2
-        dmg_coef: float = 1.5
-        dto_name: str = "Archer"
-
-    class UpdatePart(BaseModel):
         id: int
         health: Optional[confloat(ge=100.0)] = None
         damage: Optional[confloat(ge=10.0)] = None
@@ -27,3 +21,4 @@ class ArcherDto:
         radius_dmg: Optional[conint(ge=1)] = None
         base_speed: Optional[int] = None
         dmg_coef: Optional[float] = None
+        dto_name: Optional[str] = None

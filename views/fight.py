@@ -166,17 +166,12 @@ class Fight:
     @classmethod
     async def _play(cls, _game: Game) -> Game:
         # Логика игрового процесса
-        # 1. Выгружаем данные об игре из кэша
-        game_dict = dict()
-        with open('../__game_cache__', 'rb') as file:
-            game_dict = pickle.load(file)
-            if not game_dict:
-                logger.error(f"Нет данных для игры")
-                raise ValueError("Нет данных для игры")
-            else:
-                logger.success("Данные об игре выгружены из кэша")
             
-        armies_list = await Army.all().order_by('id')  # Список участвующих в игре армий
+        armies_id = _game.armies_id
+        armies_list = list([])
+        for army_id in armies_id:
+            army = await Army.filter(id=army_id).first()
+            armies_list.append(army)   # Остановился тут :)
         armies: dict[int, Army] = dict()
         for army in armies_list:
             armies[army.id] = army
@@ -239,23 +234,14 @@ class Fight:
             return game
 
         # Сохраняем данные об игре в кэш
-        with open("../__game_cache__", 'wb') as file:
-            pickle.dump(game, file)
-
-        try:
-            await access_game(method='post', game=game) # Загружаем данные игры
-        except Exception as e:
-            raise e
-            #logger.error(f"Ошибка при загрузке данных игры: \n{e}")
-            #return HTTPException(status_code=503, detail="Game cannot be initialized")
-            # Здесь должна быть обработка исключения
-            # или выбрасывается кастомное исключение (код ошибки)
+        #with open("../__game_cache__", 'wb') as file:
+        #    pickle.dump(game, file)
 
         logger.info("Запускаем игру...")
         game = await cls._play(game)
         logger.success("Турнир успешно завершен")
 
         # Сохраняем данные об игре в кэш
-        with open("../__game_cache__", 'wb') as file:
-            pickle.dump(game, file)
-        return game
+        #with open("../__game_cache__", 'wb') as file:
+        #    pickle.dump(game, file)
+        #return game

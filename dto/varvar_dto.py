@@ -13,12 +13,6 @@ class VarvarDto:
         dto_name: str = "Varvar"
 
     class Update(BaseUnit.BaseUnitUpdate):
-        radius_dmg: int = 8
-        base_speed: int = 2
-        dmg_coef: float = 2.5
-        dto_name: str = "Varvar"
-
-    class UpdatePart(BaseModel):
         id: int
         health: Optional[confloat(ge=100.0)] = None
         damage: Optional[confloat(ge=10.0)] = None
@@ -27,3 +21,4 @@ class VarvarDto:
         radius_dmg: Optional[conint(ge=1)] = None
         base_speed: Optional[int] = None
         dmg_coef: Optional[float] = None
+        dto_name: Optional[str] = None

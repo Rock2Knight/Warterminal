@@ -12,17 +12,6 @@ async def get_archer(archer_id: int) -> Optional[Archer]:
     return await Archer.get_or_none(id=archer_id)
 
 async def create_archer(army_id: int, archer_create_dto: ArcherDto.Create) -> Archer:
-
-    ##################################
-    all_archers = await Archer.all().order_by('id')
-    if all_archers:
-        for archer in all_archers:
-            logger.debug(f"{await archer.values_dict(fk_fields=True)}")
-    else:
-        logger.debug("No archers found")
-
-    ##################################
-
     try:
         archer = Archer(
             army_id=army_id,
@@ -45,34 +34,42 @@ async def create_archer(army_id: int, archer_create_dto: ArcherDto.Create) -> Ar
 async def _update_archer(archer: Archer, attr: str, value: Any) -> Archer:
     match attr:
         case "health": 
-            await Archer.filter(id=archer.id).update(health=value)
+            archer.health = value
         case "damage": 
-            await Archer.filter(id=archer.id).update(damage=value)
+            archer.damage = value
         case "defense":
-            await Archer.filter(id=archer.id).update(defense=value)
+            archer.defense = value
         case "x_coord":
-            await Archer.filter(id=archer.id).update(x_coord=value)
+            archer.x_coord = value
         case "y_coord":
-            await Archer.filter(id=archer.id).update(y_coord=value)
+            archer.y_coord = value
         case "radius_dmg":
-            await Archer.filter(id=archer.id).update(radius_dmg=value)
+            archer.radius_dmg = value
         case "base_speed":
-            await Archer.filter(id=archer.id).update(base_speed=value)
+            archer.base_speed = value
         case "dmg_coef":
-            await Archer.filter(id=archer.id).update(dmg_coef=value)
+            archer.dmg_coef = value
+    await archer.save()
+    return archer
 
 
 
-async def update_full_archer(update_dto: ArcherDto.Update) -> Archer:
+async def update_full_archer(update_dto: ArcherDto.Update) -> Optional[Archer]:
     """ Реализация PUT-запроса """
     archer = await get_archer(update_dto.id)
+    if archer is None:
+        return None
     update_dict = update_dto.model_dump()
 
     try:
         for attr, value in update_dict.items():
             if attr == 'coord':
-                archer = await _update_archer(archer, "x_coord", value.x)
-                archer = await _update_archer(archer, "y_coord", value.y)
+                if value is None:
+                    archer = await _update_archer(archer, "x_coord", None)
+                    archer = await _update_archer(archer, "y_coord", None)
+                else:
+                    archer = await _update_archer(archer, "x_coord", value.x)
+                    archer = await _update_archer(archer, "y_coord", value.y)
             else:
                 archer = await _update_archer(archer, attr, value)
         return archer

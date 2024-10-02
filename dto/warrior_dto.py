@@ -21,3 +21,4 @@ class WarriorDto:
         radius_dmg: Optional[conint(ge=1)] = None
         base_speed: Optional[int] = None
         dmg_coef: Optional[float] = None
+        dto_name: Optional[str] = None

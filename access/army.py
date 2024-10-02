@@ -21,13 +21,21 @@ async def access_army(**kwargs):
                 return HTTPException(status_code=status.HTTP_404_NOT_FOUND)
         case "post":
             if isinstance(kwargs['army_dto'], ArmyDto.Create):
-                #logger.debug(f"Army dto: {kwargs['army_dto']}")
                 army_dump['army_dto_create'] = kwargs['army_dto']
                 try:
                     return await ArmyLoader.create(**army_dump)
                 except BaseLoaderException:
                     return HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY)
-        case "put", "patch":
+        case "put":
+            if isinstance(kwargs['army_dto'], ArmyDto.Update):
+                try:
+                    return await ArmyLoader.update(**kwargs)
+                except Exception as e:
+                    if isinstance(e, BaseLoaderException):
+                        return HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY)
+                    else:
+                        raise e
+        case "patch":
             if isinstance(kwargs['army_dto'], ArmyDto.Update):
                 try:
                     return await ArmyLoader.update(**kwargs)

@@ -35,7 +35,7 @@ async def get_army(id: int, response: Response):
 
 
 @app.post("/army/{id}/{name}/{count}")
-async def create_army(name: str, count: int, army_dto: ArmyDto.Create, response: Response):
+async def create_army(id: int, name: str, count: int, army_dto: ArmyDto.Create, response: Response):
     
     army_model = {'method': 'post', 'army_id': army_dto.id, 'army_dto': army_dto}
     army_resp = await access_army(**army_model)
@@ -59,12 +59,11 @@ async def put_army(id: int, army_dto: ArmyDto.Update, response: Response):
 async def patch_army(id: int, army_dto: ArmyDto.Update, response: Response):
     army_model = {'method': 'patch', 'army_id': army_dto.id, 'army_dto': army_dto}
     army_resp = await access_army(**army_model)
-    if isinstance(army_resp, dict):
-        response.status_code = status.HTTP_201_CREATED
-        return army_resp
-    elif isinstance(army_resp, HTTPException):
+    if isinstance(army_resp, HTTPException):
         response.status_code = army_resp.status_code
         return army_resp     
+    response.status_code = status.HTTP_201_CREATED
+    return army_resp
 
 
 @app.delete("/army/{id}")
@@ -101,7 +100,7 @@ async def create_warrior(id: int, army_id: int, warrior_dto: WarriorDto.Create, 
     return warrior_resp
 
 
-@app.put("/warrior/{id}")
+@app.put("/warrior/{id}/{army_id}")
 async def put_warrior(id: int, army_id: int, warrior_dto: WarriorDto.Update, response: Response):
 
     warrior_model = {'method': 'put', 'army_id': army_id, 'dto': warrior_dto}
@@ -114,23 +113,22 @@ async def put_warrior(id: int, army_id: int, warrior_dto: WarriorDto.Update, res
         return warrior_resp     
 
 
-@app.patch("/warrior/{id}")
+@app.patch("/warrior/{id}/{army_id}")
 async def patch_warrior(id: int, army_id: int, warrior_dto: WarriorDto.Update, response: Response):
 
     warrior_model = {'method': 'patch', 'army_id': army_id, 'dto': warrior_dto}
     warrior_resp = await access_warrior(**warrior_model)
-    if isinstance(warrior_resp, dict):
-        response.status_code = status.HTTP_201_CREATED
-        return warrior_resp
-    elif isinstance(warrior_resp, HTTPException):
+    if isinstance(warrior_resp, HTTPException):
         response.status_code = warrior_resp.status_code
-        return warrior_resp
+    else:
+        response.status_code = status.HTTP_201_CREATED
+    return warrior_resp
 
 @app.delete("/warrior/{id}")
 async def delete_warrior(id: int, response: Response):
 
     warrior_model = {'method': 'delete', 'id': id}
-    warrior_resp = await access_army(**warrior_model)
+    warrior_resp = await access_warrior(**warrior_model)
     if isinstance(warrior_resp, HTTPException):
         response.status_code = warrior_resp.status_code
     return warrior_resp     # Если возникла ошибка
@@ -160,11 +158,11 @@ async def create_archer(id: int, army_id: int, archer_dto: ArcherDto.Create, res
     response.status_code = status.HTTP_201_CREATED
     return archer_resp
 
-@app.put("/archer/{id}")
-async def put_warrior(id: int, army_id: int, archer_dto: ArcherDto.Update, response: Response):
+@app.put("/archer/{id}/{army_id}")
+async def put_archer(id: int, army_id: int, archer_dto: ArcherDto.Update, response: Response):
 
     archer_model = {'method': 'put', 'army_id': army_id, 'dto': archer_dto}
-    archer_resp = await access_warrior(**archer_model)
+    archer_resp = await access_archer(**archer_model)
     if isinstance(archer_resp, dict):
         response.status_code = status.HTTP_201_CREATED
         return archer_resp
@@ -173,17 +171,16 @@ async def put_warrior(id: int, army_id: int, archer_dto: ArcherDto.Update, respo
         return HTTPException(status_code=archer_resp.status_code)     
 
 
-@app.patch("/archer/{id}")
-async def patch_warrior(id: int, army_id: int, archer_dto: ArcherDto.Update, response: Response):
+@app.patch("/archer/{id}/{army_id}")
+async def patch_archer(id: int, army_id: int, archer_dto: ArcherDto.Update, response: Response):
 
     archer_model = {'method': 'patch', 'army_id': army_id, 'dto': archer_dto}
-    archer_resp = await access_warrior(**archer_model)
-    if isinstance(archer_resp, dict):
-        response.status_code = status.HTTP_201_CREATED
-        return archer_resp
-    elif isinstance(archer_resp, HTTPException):
+    archer_resp = await access_archer(**archer_model)
+    if isinstance(archer_resp, HTTPException):
         response.status_code = archer_resp.status_code
         return HTTPException(status_code=archer_resp.status_code)
+    response.status_code = status.HTTP_201_CREATED
+    return archer_resp
     
 
 @app.delete("/archer/{id}")
@@ -218,8 +215,8 @@ async def create_varvar(id: int, army_id: int, varvar_dto: VarvarDto.Create, res
     response.status_code = status.HTTP_201_CREATED
     return varvar_resp
 
-@app.put("/varvar/{id}")
-async def put_warrior(id: int, army_id: int, varvar_dto: VarvarDto.Update, response: Response):
+@app.put("/varvar/{id}/{army_id}")
+async def put_varvar(id: int, army_id: int, varvar_dto: VarvarDto.Update, response: Response):
 
     varvar_model = {'method': 'put', 'army_id': army_id, 'dto': varvar_dto}
     varvar_resp = await access_varvar(**varvar_model)
@@ -230,17 +227,16 @@ async def put_warrior(id: int, army_id: int, varvar_dto: VarvarDto.Update, respo
         response.status_code = varvar_resp.status_code
         return HTTPException(status_code=varvar_resp.status_code)
 
-@app.patch("/varvar/{id}")
-async def patch_warrior(id: int, army_id: int, varvar_dto: VarvarDto.Update, response: Response):
+@app.patch("/varvar/{id}/{army_id}")
+async def patch_varvar(id: int, army_id: int, varvar_dto: VarvarDto.Update, response: Response):
 
     varvar_model = {'method': 'patch', 'army_id': army_id, 'dto': varvar_dto}
     varvar_resp = await access_varvar(**varvar_model)
-    if isinstance(varvar_resp, dict):
-        response.status_code = status.HTTP_201_CREATED
-        return varvar_resp
-    elif isinstance(varvar_resp, HTTPException):
+    if isinstance(varvar_resp, HTTPException):
         response.status_code = varvar_resp.status_code
         return HTTPException(status_code=varvar_resp.status_code)
+    response.status_code = status.HTTP_201_CREATED
+    return varvar_resp
 
 
 @app.delete("/varvar/{id}")

@@ -21,29 +21,29 @@ class ArcherLoader(ModelLoader):
         return await archer.values_dict(fk_fields=True)
        
     @classmethod
-    async def update(cls, **kwargs) -> Archer:
-        if isinstance(kwargs['dto'], ArcherDto.Update):
-            match kwargs['method']:
-                case 'put':
-                    try:
-                        archer = await update_full_archer(kwargs['dto'])
-                        return await archer
-                    except Exception as e:
-                        logger.error(f"Within updating archer: {e}")
-                        raise e                
-                case 'patch':
-                    try:
-                        archer = await update_part_archer(kwargs['dto'])
-                        return await archer
-                    except Exception as e:
-                        logger.error(f"Within updating archer: {e}")
-                        raise e
-        else:
-            raise BaseLoaderException
+    async def update(cls, **kwargs) -> Optional[Archer]:
+        match kwargs['method']:
+            case 'put':
+                try:
+                    archer = await update_full_archer(kwargs['dto'])
+                    if archer is None:
+                        return None
+                    return archer
+                except Exception as e:
+                    logger.error(f"Within updating archer: {e}")
+                    raise e                
+            case 'patch':
+                try:
+                    logger.debug("In patch loader")
+                    archer = await update_part_archer(kwargs['dto'])
+                    return archer
+                except Exception as e:
+                    logger.error(f"Within updating archer: {e}")
+                    raise e
 
     @classmethod
     async def delete(cls, **kwargs):
         try:
-            await delete_archer(id)
+            await delete_archer(kwargs['id'])
         except BaseLoaderException as e:
             raise e

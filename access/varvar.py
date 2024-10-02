@@ -1,13 +1,14 @@
+from typing import Optional
+
 from loguru import logger
 from fastapi import HTTPException, status
 
 from dto.varvar_dto import VarvarDto
 from loaders.varvar import VarvarLoader
 from loaders.exceptions import *
+from models import Varvar
 
-GenericVarvarDto = VarvarDto.Create | VarvarDto.Update | VarvarDto.UpdatePart
-
-async def access_varvar(**kwargs):
+async def access_varvar(**kwargs) -> Optional[Varvar | HTTPException]:
     match kwargs['method']:
         case "get":
             try:
@@ -16,23 +17,32 @@ async def access_varvar(**kwargs):
                 return HTTPException(status_code=status.HTTP_404_NOT_FOUND)
         case "post":
             if isinstance(kwargs['dto'], VarvarDto.Create): 
-                logger.info(f"Varvar DTO {kwargs['dto']} передан в access, POST")
+                logger.success(f"Varvar DTO {kwargs['dto']} передан в access, POST")
                 return await VarvarLoader.create(army_id=kwargs['army_id'], dto=kwargs['dto'])
             else:
                 logger.error(f"Invalid DTO {kwargs['dto']}")
                 raise ValueError("Invalid DTO")
-        case "put", "patch":
+        case "put":
             if isinstance(kwargs['dto'], VarvarDto.Update):
-                logger.info(f"Varvar DTO {kwargs['dto']} передан в access, PUT")
+                logger.success(f"Varvar DTO {kwargs['dto']} передан в access, PUT")
                 try: 
-                    return await VarvarLoader.update(**kwargs)
+                    res = await VarvarLoader.update(**kwargs)
+                    return res
                 except BaseLoaderException:
                     return HTTPException(status_code=status.HTTP_400_BAD_REQUEST)
             else:
                 logger.error(f"Invalid DTO {kwargs['dto']}")
                 return HTTPException(status_code=status.HTTP_400_BAD_REQUEST)
+        case "patch":
+            logger.debug("In patch")
+            logger.success(f"Varvar DTO {kwargs['dto']} передан в access, PATCH")
+            try: 
+                res = await VarvarLoader.update(**kwargs)
+                return res
+            except BaseLoaderException:
+                return HTTPException(status_code=status.HTTP_400_BAD_REQUEST)
         case "delete":
             try:
-                await VarvarLoader.delete(kwargs['id'])
+                await VarvarLoader.delete(id=kwargs['id'])
             except Exception:
                 return HTTPException(status_code=status.HTTP_400_BAD_REQUEST)

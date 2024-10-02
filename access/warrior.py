@@ -1,3 +1,5 @@
+from typing import Optional
+
 from loguru import logger
 from fastapi import HTTPException, status
 
@@ -5,9 +7,9 @@ from dto.warrior_dto import WarriorDto
 from loaders.warrior import WarriorLoader
 from loaders.exceptions import *
 
-GenericWarriorDto = WarriorDto.Create | WarriorDto.Update | WarriorDto.UpdatePart
+from models import Warrior
 
-async def access_warrior(**kwargs):
+async def access_warrior(**kwargs) -> Optional[Warrior | HTTPException]:
     match kwargs['method']:
         case "get":
             try:
@@ -24,15 +26,23 @@ async def access_warrior(**kwargs):
             else:
                 logger.error(f"Invalid DTO {kwargs['dto']}")
                 raise ValueError("Invalid DTO")
-        case "put", "patch":
+        case "put":
+            logger.debug("In warrior access")
             if isinstance(kwargs['dto'], WarriorDto.Update):
                 logger.info(f"Warrior DTO {kwargs['dto']} передан в access, PUT")
                 try: 
-                    return await WarriorLoader.update(**kwargs)
+                    res = await WarriorLoader.update(**kwargs)
+                    return res
                 except BaseLoaderException:
                     return HTTPException(status_code=status.HTTP_400_BAD_REQUEST)
             else:
                 logger.error(f"Invalid DTO {kwargs['dto']}")
+                return HTTPException(status_code=status.HTTP_400_BAD_REQUEST)
+        case 'patch':
+            logger.info(f"Warrior DTO {kwargs['dto']} передан в access, PATCH")
+            try: 
+                return await WarriorLoader.update(**kwargs)
+            except BaseLoaderException:
                 return HTTPException(status_code=status.HTTP_400_BAD_REQUEST)
         case "delete":
             try:

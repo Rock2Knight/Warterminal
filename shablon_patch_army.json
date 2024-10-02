@@ -1,0 +1,19 @@
+{
+    "id": 10,
+    "name": "Sprites",
+    "count": 2,
+    "units": {
+      "5": {
+          "id": 5,
+          "health": 200,
+          "defense": 85,
+          "dto_name": "varvar"
+      },
+      "12": {
+          "id": 12,
+          "health": 115,
+          "defense": 67,
+          "dto_name": "archer"
+      }
+    }
+  }

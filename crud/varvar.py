@@ -13,16 +13,6 @@ async def get_varvar(varvar_id: int) -> Optional[Varvar]:
 
 async def create_varvar(army_id: int, varvar_create_dto: VarvarDto.Create) -> Varvar:
 
-    ##################################
-    all_varvars = await Varvar.all().order_by('id')
-    if all_varvars:
-        for varvar in all_varvars:
-            logger.debug(f"{await varvar.values_dict(fk_fields=True)}")
-    else:
-        logger.debug("No varvars found")
-
-    ##################################
-
     try:
         varvar = Varvar(
             army_id=army_id,
@@ -45,21 +35,23 @@ async def create_varvar(army_id: int, varvar_create_dto: VarvarDto.Create) -> Va
 async def _update_varvar(varvar: Varvar, attr: str, value: Any) -> Varvar:
     match attr:
         case "health": 
-            await Varvar.filter(id=varvar.id).update(health=value)
+            varvar.health = value
         case "damage": 
-            await Varvar.filter(id=varvar.id).update(damage=value)
+            varvar.damage = value
         case "defense":
-            await Varvar.filter(id=varvar.id).update(defense=value)
+            varvar.defense = value
         case "x_coord":
-            await Varvar.filter(id=varvar.id).update(x_coord=value)
+            varvar.x_coord = value
         case "y_coord":
-            await Varvar.filter(id=varvar.id).update(y_coord=value)
+            varvar.y_coord = value
         case "radius_dmg":
-            await Varvar.filter(id=varvar.id).update(radius_dmg=value)
+            varvar.radius_dmg = value
         case "base_speed":
-            await Varvar.filter(id=varvar.id).update(base_speed=value)
+            varvar.base_speed = value
         case "dmg_coef":
-            await Varvar.filter(id=varvar.id).update(dmg_coef=value)
+            varvar.dmg_coef = value
+    await varvar.save()
+    return varvar
 
 
 
@@ -71,8 +63,12 @@ async def update_full_varvar(update_dto: VarvarDto.Update) -> Varvar:
     try:
         for attr, value in update_dict.items():
             if attr == 'coord':
-                varvar = await _update_varvar(varvar, "x_coord", value.x)
-                varvar = await _update_varvar(varvar, "y_coord", value.y)
+                if value is None:
+                    varvar = await _update_varvar(varvar, "x_coord", None)
+                    varvar = await _update_varvar(varvar, "y_coord", None)
+                else:
+                    varvar = await _update_varvar(varvar, "x_coord", value.x)
+                    varvar = await _update_varvar(varvar, "y_coord", value.y)
             else:
                 varvar = await _update_varvar(varvar, attr, value)
         return varvar
@@ -81,9 +77,11 @@ async def update_full_varvar(update_dto: VarvarDto.Update) -> Varvar:
 
 
 
-async def update_part_varvar(update_dto: VarvarDto.UpdatePart) -> Varvar:
+async def update_part_varvar(update_dto: VarvarDto.Update) -> Optional[Varvar]:
     """ Реализация PATCH-запроса """
     varvar = await get_varvar(update_dto.id)
+    if varvar is None:
+        return None
     update_dict = update_dto.model_dump()
 
     try:

@@ -16,7 +16,7 @@ class Game(BaseModel):
     gmap: Point          # карта
     army_count: int
     units_count: int
-    armies: list[ArmyDto.Create]
+    armies_id: list[int]
     is_play: bool = True
     is_over: bool = False
     win_army: Optional[ArmyStatBase] = None

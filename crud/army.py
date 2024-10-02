@@ -9,14 +9,6 @@ from .exceptions import *
 
 async def create_army(name: str, count: int, is_failed: bool = False, 
             fight_with: Optional[int]=None) -> Army:
-    ##################################
-    all_armies = await Army.all().order_by('id')
-    if all_armies:
-        for army in all_armies:
-            logger.debug(f"{await army.values_dict()}")
-    else:
-        logger.debug(f"No armies in db")
-    ##################################
     army = await Army.create(name=name, count=count, is_failed=is_failed, fight_with_id=fight_with)
     return army
 

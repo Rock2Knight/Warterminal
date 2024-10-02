@@ -15,17 +15,6 @@ async def get_warrior(warrior_id: int) -> Optional[Warrior]:
 
 async def create_warrior(army_id: int, warrior_create_dto: WarriorDto.Create) -> Warrior:
 
-    ##################################
-    all_warriors = await Warrior.all().order_by('id')
-    if all_warriors:
-        for warrior in all_warriors:
-            logger.debug(f"{await warrior.values_dict(fk_fields=True)}")
-    else:
-        logger.debug("No warriors found")
-
-    ##################################
-
-
     try:
         warrior = Warrior(
             army_id=army_id,
@@ -48,38 +37,54 @@ async def create_warrior(army_id: int, warrior_create_dto: WarriorDto.Create) ->
 async def _update_warrior(warrior: Warrior, attr: str, value: Any) -> Warrior:
     match attr:
         case "health": 
-            await Warrior.filter(id=warrior.id).update(health=value)
+            warrior.health = value
         case "damage": 
-            await Warrior.filter(id=warrior.id).update(damage=value)
+            warrior.damage = value
         case "defense":
-            await Warrior.filter(id=warrior.id).update(defense=value)
+            warrior.defense = value
         case "x_coord":
-            await Warrior.filter(id=warrior.id).update(x_coord=value)
+            warrior.x_coord = value
         case "y_coord":
-            await Warrior.filter(id=warrior.id).update(y_coord=value)
+            warrior.y_coord = value
         case "radius_dmg":
-            await Warrior.filter(id=warrior.id).update(radius_dmg=value)
+            warrior.radius_dmg = value
         case "base_speed":
-            await Warrior.filter(id=warrior.id).update(base_speed=value)
+            warrior.base_speed = value
         case "dmg_coef":
-            await Warrior.filter(id=warrior.id).update(dmg_coef=value)
+            warrior.dmg_coef = value
+    await warrior.save()
+    return warrior
 
 
 
-async def update_full_warrior(update_dto: WarriorDto.Update) -> Warrior:
+async def update_full_warrior(update_dto: WarriorDto.Update) -> Optional[Warrior]:
     """ Реализация PUT-запроса """
     warrior = await get_warrior(update_dto.id)
+    if warrior is None:
+        return None
+    logger.debug(f"warrior = {warrior}")
     update_dict = update_dto.model_dump()
 
     try:
         for attr, value in update_dict.items():
+            logger.debug(f"key = {attr}, value = {value}")
             if attr == 'coord':
-                warrior = await _update_warrior(warrior, "x_coord", value.x)
-                warrior = await _update_warrior(warrior, "y_coord", value.y)
+                if value is None:
+                    warrior = await _update_warrior(warrior, "x_coord", None)
+                    logger.debug(f"warrior = {warrior}")
+                    warrior = await _update_warrior(warrior, "y_coord", None)
+                    logger.debug(f"warrior = {warrior}")
+                else:
+                    warrior = await _update_warrior(warrior, "x_coord", value.x)
+                    logger.debug(f"warrior = {warrior}")
+                    warrior = await _update_warrior(warrior, "y_coord", value.y)
+                    logger.debug(f"warrior = {warrior}")
             else:
                 warrior = await _update_warrior(warrior, attr, value)
+                logger.debug(f"warrior = {warrior}")
         return warrior
     except Exception as e:
+        logger.error(e.args)
         raise UpdateModelException
 
 

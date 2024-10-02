@@ -23,25 +23,24 @@ class WarriorLoader(ModelLoader):
         return await warrior.values_dict(fk_fields=True)
        
     @classmethod
-    async def update(cls, **kwargs) -> Warrior:
-        if isinstance(kwargs['dto'], WarriorDto.Update):
-            match kwargs['method']:
-                case 'put':
-                    try:
-                        warrior = await update_full_warrior(kwargs['dto'])
-                        return await warrior
-                    except Exception as e:
-                        logger.error(f"Within updating warrior: {e}")
-                        raise e                
-                case 'patch':
-                    try:
-                        warrior = await update_part_warrior(kwargs['dto'])
-                        return await warrior
-                    except Exception as e:
-                        logger.error(f"Within updating warrior: {e}")
-                        raise e
-        else:
-            raise BaseLoaderException
+    async def update(cls, **kwargs) -> Optional[Warrior]:
+        match kwargs['method']:
+            case 'put':
+                try:
+                    warrior = await update_full_warrior(kwargs['dto'])
+                    if warrior is None:
+                        return None
+                    return warrior
+                except Exception as e:
+                    logger.error(f"Within updating warrior: {e}")
+                    raise e                
+            case 'patch':
+                try:
+                    warrior = await update_part_warrior(kwargs['dto'])
+                    return warrior
+                except Exception as e:
+                    logger.error(f"Within updating warrior: {e}")
+                    raise e
 
     @classmethod
     async def delete(cls, id: int):
