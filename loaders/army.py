@@ -21,27 +21,28 @@ class ArmyLoader(ModelLoader):
 
     @classmethod
     async def create(cls, **kwargs):
+        tasks = None
         try:
-            task = list[asyncio.create_task(create_army(kwargs['army_dto_create'].name, kwargs['army_dto_create'].count))]
-            done, pending = await asyncio.wait(task)
-            while not pending:
-                a = 1
-            for future in done.result():
-                print(future)
+            army = await create_army(kwargs['army_dto_create'].name, kwargs['army_dto_create'].count)
         except Exception as e:
             logger.error(f"Within creating army: {e}")
+            raise e
 
         for unit in kwargs['army_dto_create'].units.values():
+            logger.debug(f"Unit is instance of {type(unit)}")
             unit_dump = {'dto': None, 'method': 'post'}
             if isinstance(unit, WarriorDto.Create):
+                logger.debug("Unit is instance of warrior")
                 unit_dump['dto'] = unit
                 unit_dump['army_id'] = kwargs['army_dto_create'].id
                 await access_warrior(**unit_dump)
             elif isinstance(unit, ArcherDto.Create):
+                logger.debug("Unit is instance of archer")
                 unit_dump['dto'] = unit
                 unit_dump['army_id'] = kwargs['army_dto_create'].id
                 await access_archer(**unit_dump)
             elif isinstance(unit, VarvarDto.Create):
+                logger.debug("Unit is instance of varvar")
                 unit_dump['dto'] = unit
                 unit_dump['army_id'] = kwargs['army_dto_create'].id
                 await access_varvar(**unit_dump)

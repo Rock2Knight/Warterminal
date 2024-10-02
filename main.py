@@ -10,7 +10,7 @@ async def startup_event():
     register_tortoise(
         app,
         config=DB_CONFIG,
-        generate_schemas=True,  # Автоматическое создание схем при старте
+        generate_schemas=False,  # Автоматическое создание схем при старте
         add_exception_handlers=True,  # Добавляем обработчики ошибок для Tortoise
     )
 

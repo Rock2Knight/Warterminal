@@ -76,22 +76,5 @@ class ModelLoader(Model):
                     t_d.update({field: [await i.values_dict() for i in model if i]})
         return t_d
 
-
-    @classmethod
-    async def create(cls, **kwargs):
-        pass
-
-    @classmethod
-    async def get(cls, **kwargs):
-        pass
-        
-    @classmethod
-    async def update(cls, **kwargs):
-        pass
-
-    @classmethod
-    async def delete(cls, **kwargs):
-        pass
-
     class Meta:
         abstract = True

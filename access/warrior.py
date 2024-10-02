@@ -10,6 +10,7 @@ async def access_warrior(**kwargs):
         case "get":
             pass
         case "post":
+            logger.debug(f"Warrior DTO: {kwargs['dto']}, type = {type(kwargs['dto'])}")
             if isinstance(kwargs['dto'], WarriorDto.Create): 
                 logger.info(f"Warrior DTO {kwargs['dto']} передан в access, POST")
                 return await WarriorLoader.create(army_id=kwargs['army_id'], dto=kwargs['dto'])

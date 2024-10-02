@@ -186,8 +186,9 @@ class Fight:
 
         ##################################################
         # Отладочная часть
-        logger.debug(f"Спиок армий:\n{armies}")
-
+        #logger.debug(f"Спиок армий:\n{armies}")
+        for army in armies.values():
+            logger.debug(f"Спиок армий:\n{await army.values_dict()}")
 
         ##################################################
 
@@ -244,8 +245,9 @@ class Fight:
         try:
             await access_game(method='post', game=game) # Загружаем данные игры
         except Exception as e:
-            logger.error(f"Ошибка при загрузке данных игры: \n{e}")
-            return HTTPException(status_code=503, detail="Game cannot be initialized")
+            raise e
+            #logger.error(f"Ошибка при загрузке данных игры: \n{e}")
+            #return HTTPException(status_code=503, detail="Game cannot be initialized")
             # Здесь должна быть обработка исключения
             # или выбрасывается кастомное исключение (код ошибки)
 

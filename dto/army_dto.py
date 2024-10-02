@@ -5,6 +5,9 @@ from typing import Optional
 from pydantic import BaseModel, validator, confloat, conint
 
 from .base_schema import Point, BaseUnit
+from .warrior_dto import WarriorDto
+from .archer_dto import ArcherDto
+from .varvar_dto import VarvarDto
 
 class ArmyDto:
 
@@ -12,13 +15,13 @@ class ArmyDto:
         id: int
         name: str
         count: int
-        units: dict[int, BaseUnit.BaseUnitCreate] = dict()
+        units: dict[int, WarriorDto.Create | VarvarDto.Create | ArcherDto.Create] = dict()
 
     class Update(BaseModel):
         id: int
         name: Optional[str]
         count: Optional[int]
-        units: Optional[dict[int, BaseUnit.BaseUnitUpdate]]
+        units: Optional[dict[int, WarriorDto.Update | VarvarDto.Update | ArcherDto.Update]]
 
     '''
     def add_unit(self, count: int, voins: list[BaseUnit]):
