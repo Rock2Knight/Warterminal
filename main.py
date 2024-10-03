@@ -1,6 +1,6 @@
 from imports import *
 
-logger.add("debug_10_02.log", format="{time} {level} {message}", level="DEBUG", backtrace=True)
+logger.add("debug_10_02.log", format="{time} | {level}   | {module}:{function}:{line} - {message}", level="DEBUG", backtrace=True)
 
 app = FastAPI()
 
@@ -252,7 +252,7 @@ async def delete_varvar(id: int, response: Response):
 async def start_game(army_count: int, units_count: int, game: Game, response: Response):
 
     game_result = await Fight.init_fight(game)  # Запускаем игру
-    if isinstance(game_result, Game):
+    if not isinstance(game_result, HTTPException):
         response.status_code = status.HTTP_201_CREATED
         return game_result.model_dump()
     else:

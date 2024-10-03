@@ -33,25 +33,26 @@ class ArmyLoader(ModelLoader):
             logger.error(f"Within creating army: {e}")
             raise e
 
-        for unit in kwargs['army_dto_create'].units.values():
-            logger.debug(f"Unit is instance of {type(unit)}")
-            unit_dump = {'dto': None, 'method': 'post'}
-            match unit.dto_name:
-                case 'Warrior': 
-                    warrior_dump = {'method': 'post', 'army_id': army.id,
-                            'dto': WarriorDto.Create(**unit.model_dump())}
-                    warrior_dump['method'] = 'post'
-                    await access_warrior(**warrior_dump)
-                case 'Archer': 
-                    archer_dump = {'method': 'post', 'army_id': army.id,
-                            'dto': ArcherDto.Create(**unit.model_dump())}
-                    archer_dump['method'] = 'post'
-                    await access_archer(**archer_dump)
-                case 'Varvar': 
-                    varvar_dump = {'method': 'post', 'army_id': army.id,
-                            'dto': VarvarDto.Create(**unit.model_dump())}
-                    varvar_dump['method'] = 'post'
-                    await access_varvar(**varvar_dump)
+        if kwargs['army_dto_create'].units:
+            for unit in kwargs['army_dto_create'].units.values():
+                logger.debug(f"Unit is instance of {type(unit)}")
+                unit_dump = {'dto': None, 'method': 'post'}
+                match unit.dto_name:
+                    case 'Warrior': 
+                        warrior_dump = {'method': 'post', 'army_id': army.id,
+                                'dto': WarriorDto.Create(**unit.model_dump())}
+                        warrior_dump['method'] = 'post'
+                        await access_warrior(**warrior_dump)
+                    case 'Archer': 
+                        archer_dump = {'method': 'post', 'army_id': army.id,
+                                'dto': ArcherDto.Create(**unit.model_dump())}
+                        archer_dump['method'] = 'post'
+                        await access_archer(**archer_dump)
+                    case 'Varvar': 
+                        varvar_dump = {'method': 'post', 'army_id': army.id,
+                                'dto': VarvarDto.Create(**unit.model_dump())}
+                        varvar_dump['method'] = 'post'
+                        await access_varvar(**varvar_dump)
 
         return await army.values_dict()
 

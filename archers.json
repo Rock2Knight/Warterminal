@@ -1,0 +1,164 @@
+[
+    {
+      "health": 119,
+      "damage": 12,
+      "defense": 64,
+      "base_speed": 2,
+      "dto_name": "Archer",
+      "radius_dmg": 24,
+      "dmg_coef": 1.65
+    },
+    {
+      "health": 47,
+      "damage": 12,
+      "defense": 52,
+      "base_speed": 2,
+      "dto_name": "Archer",
+      "radius_dmg": 20,
+      "dmg_coef": 1.64
+    },
+    {
+      "health": 20,
+      "damage": 10,
+      "defense": 61,
+      "base_speed": 2,
+      "dto_name": "Archer",
+      "radius_dmg": 20,
+      "dmg_coef": 1.51
+    },
+    {
+      "health": 105,
+      "damage": 15,
+      "defense": 70,
+      "base_speed": 2,
+      "dto_name": "Archer",
+      "radius_dmg": 23,
+      "dmg_coef": 1.93
+    },
+    {
+      "health": 119,
+      "damage": 11,
+      "defense": 52,
+      "base_speed": 2,
+      "dto_name": "Archer",
+      "radius_dmg": 22,
+      "dmg_coef": 1.55
+    },
+    {
+      "health": 69,
+      "damage": 11,
+      "defense": 51,
+      "base_speed": 2,
+      "dto_name": "Archer",
+      "radius_dmg": 25,
+      "dmg_coef": 1.62
+    },
+    {
+      "health": 15,
+      "damage": 11,
+      "defense": 67,
+      "base_speed": 2,
+      "dto_name": "Archer",
+      "radius_dmg": 21,
+      "dmg_coef": 1.81
+    },
+    {
+      "health": 57,
+      "damage": 14,
+      "defense": 67,
+      "base_speed": 2,
+      "dto_name": "Archer",
+      "radius_dmg": 23,
+      "dmg_coef": 1.59
+    },
+    {
+      "health": 65,
+      "damage": 12,
+      "defense": 69,
+      "base_speed": 2,
+      "dto_name": "Archer",
+      "radius_dmg": 23,
+      "dmg_coef": 1.59
+    },
+    {
+      "health": 57,
+      "damage": 10,
+      "defense": 69,
+      "base_speed": 2,
+      "dto_name": "Archer",
+      "radius_dmg": 21,
+      "dmg_coef": 1.89
+    },
+    {
+      "health": 97,
+      "damage": 15,
+      "defense": 50,
+      "base_speed": 2,
+      "dto_name": "Archer",
+      "radius_dmg": 21,
+      "dmg_coef": 1.67
+    },
+    {
+      "health": 101,
+      "damage": 12,
+      "defense": 51,
+      "base_speed": 2,
+      "dto_name": "Archer",
+      "radius_dmg": 22,
+      "dmg_coef": 1.67
+    },
+    {
+      "health": 61,
+      "damage": 14,
+      "defense": 59,
+      "base_speed": 2,
+      "dto_name": "Archer",
+      "radius_dmg": 23,
+      "dmg_coef": 1.52
+    },
+    {
+      "health": 47,
+      "damage": 12,
+      "defense": 60,
+      "base_speed": 2,
+      "dto_name": "Archer",
+      "radius_dmg": 24,
+      "dmg_coef": 1.92
+    },
+    {
+      "health": 29,
+      "damage": 13,
+      "defense": 69,
+      "base_speed": 2,
+      "dto_name": "Archer",
+      "radius_dmg": 20,
+      "dmg_coef": 1.65
+    },
+    {
+      "health": 47,
+      "damage": 12,
+      "defense": 54,
+      "base_speed": 2,
+      "dto_name": "Archer",
+      "radius_dmg": 22,
+      "dmg_coef": 1.6
+    },
+    {
+      "health": 37,
+      "damage": 10,
+      "defense": 52,
+      "base_speed": 2,
+      "dto_name": "Archer",
+      "radius_dmg": 22,
+      "dmg_coef": 1.87
+    },
+    {
+      "health": 32,
+      "damage": 14,
+      "defense": 56,
+      "base_speed": 2,
+      "dto_name": "Archer",
+      "radius_dmg": 22,
+      "dmg_coef": 1.87
+    }
+  ]

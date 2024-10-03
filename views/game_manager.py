@@ -5,7 +5,6 @@ from typing import Optional
 from loguru import logger
 from tortoise.exceptions import IntegrityError
 
-import crud
 from .imports import *
 
 class GameManager:
@@ -134,11 +133,12 @@ class GameManager:
 
         logger.info(f"Unit {unit.id} from {army.name} has failed")
         if isinstance(unit, Warrior):
-            delete_warrior(unit.id)
+            await delete_warrior(unit.id)
         elif isinstance(unit, Archer):
-            delete_archer(unit.id)
+            await delete_archer(unit.id)
         elif isinstance(unit, Varvar):
-            delete_varvar(unit.id)
+            await delete_varvar(unit.id)
         else:
             logger.error("Неизвестный тип юнита")
             raise UndefinedUnitTypeException("Неизвестный тип юнита")
+        logger.success(f"Unit {unit.id} from {army.name} has been deleted")

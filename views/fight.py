@@ -20,7 +20,19 @@ class Fight:
         :param is_crit: флаг определения урона
         :return: обновленные данные о защищаюсемся юните
         """
-        pass
+        dmg = unit1.damage
+        if is_crit:
+            dmg *= unit1.dmg_coef
+        if unit2.health > 0:
+            if unit2.defense > 0:
+                unit2.health = unit2.health - (dmg - unit2.defense)
+                unit2.defense -= 2
+            else:
+                unit2.health -= dmg
+            await unit2.save()
+        if unit2.health <= 0:
+            return unit2
+        return None
 
 
     @classmethod
@@ -32,8 +44,7 @@ class Fight:
         :param map1: размеры карты
         :return: результат атаки
         """
-        logger.success(f"Юнит {attacking_unit.id} по имени {attacking_unit.name} пошел с мечом" +
-                f"на {victim_unit.id} юнита по имени {victim_unit.name}")
+        logger.success(f"Юнит {attacking_unit.id} пошел с мечом на {victim_unit.id} юнита")
         
         dist = Point(x=abs(victim_unit.x_coord-attacking_unit.x_coord), y=abs(victim_unit.y_coord-attacking_unit.y_coord))
         in_radius = abs(dist.x) < attacking_unit.radius_dmg and abs(dist.y) < attacking_unit.radius_dmg
@@ -54,10 +65,14 @@ class Fight:
                 case 0 | 1: return False
                 case 2 | 3:
                     victim_unit = await cls._damage(attacking_unit, victim_unit)
+                    if victim_unit is None:
+                        return False
                     await victim_unit.save()
                     return True
                 case 4:
                     victim_unit = await cls._damage(attacking_unit, victim_unit, is_crit=True)
+                    if victim_unit is None:
+                        return False
                     await victim_unit.save()
                     return True
         return False
@@ -85,7 +100,7 @@ class Fight:
         t1 = time.perf_counter()    # Засекаем время для задержки
 
         # Логика сражения: сражаемся пока стороны не перебьют друг друга ИЛИ не истечет таймер
-        while len(units1 > 0) and len(units2) > 0:
+        while len(units1) > 0 and len(units2) > 0:
             logger.info(f"Количество юнитов в армии {army1.name} = {len(units1)}")
             logger.info(f"Количество юнитов в армии {army2.name} = {len(units2)}")
             army1_unit = random.choice(units1)
@@ -123,8 +138,20 @@ class Fight:
                 # Удаление юнита из БД, если он умер (а также вывод информации о падшем бойце)
                 if is_first and army2_unit.health <= 0:
                     await GameManager.delete_with_log_unit(army2_unit, army2)
+                    if army1_unit.health <= 0:
+                        await GameManager.delete_with_log_unit(army1_unit, army1)
+                        countOfUnits1 = await Army.filter(id=army1.id).all().count()
+                        countOfUnits2 = await Army.filter(id=army2.id).all().count()
+                        logger.info(f"Count of units in army {army1.name} = {countOfUnits1}")
+                        logger.info(f"Count of units in army {army2.name} = {countOfUnits2}")
                 elif not is_first and army1_unit.health <= 0:
                     await GameManager.delete_with_log_unit(army1_unit, army1)
+                    if army2_unit.health <= 0:
+                        await GameManager.delete_with_log_unit(army2_unit, army2)
+                        countOfUnits1 = await Army.filter(id=army1.id).all().count()
+                        countOfUnits2 = await Army.filter(id=army2.id).all().count()
+                        logger.info(f"Count of units in army {army1.name} = {countOfUnits1}")
+                        logger.info(f"Count of units in army {army2.name} = {countOfUnits2}")
 
             # Обновляем списки юнитов для каждой армии
             units1 = await get_army_units(army1.id)
@@ -147,7 +174,7 @@ class Fight:
             army1.fight_with_id = None
             await army1.save()
             del_army = await Army.filter(id=army2.id).delete()
-            logger.info(f"Army {del_army.name} with id {del_army.id} was deleted")
+            logger.info(f"Army {del_army} was deleted")
             logger.success(f"Army {army1.name} with id {army1.id} won!")
             return army1
         elif not units1 and units2:
@@ -156,22 +183,46 @@ class Fight:
             army2.fight_with_id = None
             await army2.save()
             del_army = await Army.filter(id=army1.id).delete()
-            logger.info(f"Army {del_army.name} with id {del_army.id} was deleted")
+            logger.info(f"Army {del_army} was deleted")
             logger.success(f"Army {army2.name} with id {army2.id} won!")
             return army2
         else:
-            raise InvalidFightResultException("Недействительный исход боя")
+            army1 = await Army.get_or_none(id=army1.id)
+            army2 = await Army.get_or_none(id=army2.id)
+            if army1 and not army2:
+                logger.success(f"Army {army1.name} with id {army1.id} won!")
+                await Army.filter(id=army1.id).delete()
+                return army1
+            elif not army1 and army2:
+                logger.success(f"Army {army2.name} with id {army2.id} won!")
+                await Army.filter(id=army2.id).delete()
+                return army2
+            else:
+                logger.error(f"Неизвестная ситуация")
+                raise InvalidFightResultException("Недействительный исход боя")
 
 
     @classmethod
     async def _play(cls, _game: Game) -> Game:
         # Логика игрового процесса
+
+        # Выгружаем данные из кэша
+        game_dict = dict()
+        with open('../__game_cache__', 'rb') as file:
+            game_dict = pickle.load(file)
+            if not game_dict:
+                logger.error(f"Нет данных для игры")
+                raise ValueError("Нет данных для игры")
+            else:
+                logger.success("Данные об игре выгружены из кэша")
+                
             
-        armies_id = _game.armies_id
+        armies_id_list = [id for id in _game.armies_id]
         armies_list = list([])
-        for army_id in armies_id:
+        for army_id in armies_id_list:
             army = await Army.filter(id=army_id).first()
-            armies_list.append(army)   # Остановился тут :)
+            logger.debug(f"{army}")
+            armies_list.append(army)   
         armies: dict[int, Army] = dict()
         for army in armies_list:
             armies[army.id] = army
@@ -182,8 +233,9 @@ class Fight:
         ##################################################
         # Отладочная часть
         #logger.debug(f"Спиок армий:\n{armies}")
+        logger.debug(f"Словарь армий: {armies}")
         for army in armies.values():
-            logger.debug(f"Спиок армий:\n{await army.values_dict()}")
+            logger.debug(f"Спиок армий:\n{army}")
 
         ##################################################
 
@@ -214,9 +266,15 @@ class Fight:
                     armies[id], armies[army.fight_with_id] = army, army_to_fight  # Обновляем данные об армиях
                 army_in_figths.add(armies[id])                                      # Помечаем армии, как "в бою"
                 army_in_figths.add(armies[army.fight_with_id])
-                w_army = await cls._fight_process(army, army_to_fight, game_dict['gmap'], timeout=120)               # БИТВА!
+                w_army = await cls._fight_process(army, army_to_fight, game_dict.gmap, timeout=120)               # БИТВА!
+                return w_army
 
-            armies = await Army.all().order_by('id')
+            pre_armies = await Army.all().order_by('id')
+            armies = list(set(pre_armies)-set([value for value in armies.values()]))
+            new_armies = dict()
+            for i, army in enumerate(armies):
+                new_armies[i] = army
+            armies = new_armies
 
         win_army = await Army.all().first()
         if win_army:
@@ -234,14 +292,14 @@ class Fight:
             return game
 
         # Сохраняем данные об игре в кэш
-        #with open("../__game_cache__", 'wb') as file:
-        #    pickle.dump(game, file)
+        with open("../__game_cache__", 'wb') as file:
+            pickle.dump(game, file)
 
         logger.info("Запускаем игру...")
         game = await cls._play(game)
         logger.success("Турнир успешно завершен")
 
         # Сохраняем данные об игре в кэш
-        #with open("../__game_cache__", 'wb') as file:
-        #    pickle.dump(game, file)
-        #return game
+        with open("../__game_cache__", 'wb') as file:
+            pickle.dump(game, file)
+        return game
