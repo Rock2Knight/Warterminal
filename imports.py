@@ -16,6 +16,7 @@ from tortoise.transactions import atomic
 from tortoise import Tortoise, run_async
 from tortoise.contrib.fastapi import register_tortoise
 
+import uvicorn
 from fastapi import HTTPException, Response, status
 
 from database.db import DB_CONFIG
@@ -34,6 +35,8 @@ from dto.archer_dto import ArcherDto
 from dto.varvar_dto import VarvarDto
 
 from views.fight import Fight
+
+from routers.warrior_router import router_warrior
 
 from models import *
 #from controllers import *

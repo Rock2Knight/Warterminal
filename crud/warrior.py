@@ -10,6 +10,8 @@ from .exceptions import *
 
 
 async def get_warrior(warrior_id: int) -> Optional[Warrior]:
+    #warrior = Warrior.get_or_none(id=warrior_id)
+    #logger.debug(f"warrior = {warrior}")
     return await Warrior.get_or_none(id=warrior_id)
 
 

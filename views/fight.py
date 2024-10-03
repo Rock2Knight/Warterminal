@@ -221,7 +221,6 @@ class Fight:
         armies_list = list([])
         for army_id in armies_id_list:
             army = await Army.filter(id=army_id).first()
-            logger.debug(f"{army}")
             armies_list.append(army)   
         armies: dict[int, Army] = dict()
         for army in armies_list:
@@ -229,17 +228,6 @@ class Fight:
 
         army_in_figths: set = set()          # Армии, которые находятся в бою
         id_list = list(armies.keys())   # Список id армий
-
-        ##################################################
-        # Отладочная часть
-        #logger.debug(f"Спиок армий:\n{armies}")
-        logger.debug(f"Словарь армий: {armies}")
-        for army in armies.values():
-            logger.debug(f"Спиок армий:\n{army}")
-
-        ##################################################
-
-        logger.info("Point 1")
             
         while len(armies) > 1:
             # Цикл организации сражений

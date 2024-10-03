@@ -23,15 +23,11 @@ async def access_varvar(**kwargs) -> Optional[Varvar | HTTPException]:
                 logger.error(f"Invalid DTO {kwargs['dto']}")
                 raise ValueError("Invalid DTO")
         case "put":
-            if isinstance(kwargs['dto'], VarvarDto.Update):
-                logger.success(f"Varvar DTO {kwargs['dto']} передан в access, PUT")
-                try: 
-                    res = await VarvarLoader.update(**kwargs)
-                    return res
-                except BaseLoaderException:
-                    return HTTPException(status_code=status.HTTP_400_BAD_REQUEST)
-            else:
-                logger.error(f"Invalid DTO {kwargs['dto']}")
+            logger.success(f"Varvar DTO {kwargs['dto']} передан в access, PUT")
+            try: 
+                res = await VarvarLoader.update(**kwargs)
+                return res
+            except BaseLoaderException:
                 return HTTPException(status_code=status.HTTP_400_BAD_REQUEST)
         case "patch":
             logger.debug("In patch")

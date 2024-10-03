@@ -1,8 +1,9 @@
 from imports import *
 
-logger.add("debug_10_02.log", format="{time} | {level}   | {module}:{function}:{line} - {message}", level="DEBUG", backtrace=True)
+logger.add("debug_10_03.log", format="{time} | {level}   | {module}:{function}:{line} - {message}", level="DEBUG", backtrace=True)
 
 app = FastAPI()
+#app.include_router(router_warrior)
 
 @app.on_event("startup")
 async def startup_event():
@@ -254,7 +255,10 @@ async def start_game(army_count: int, units_count: int, game: Game, response: Re
     game_result = await Fight.init_fight(game)  # Запускаем игру
     if not isinstance(game_result, HTTPException):
         response.status_code = status.HTTP_201_CREATED
-        return game_result.model_dump()
+        return game_result
     else:
-        response.status_code = status.HTTP_503_SERVICE_UNAVAILABLE
+        response.status_code = status.HTTP_400_BAD_REQUEST
         return game_result     # Если возникла ошибка
+    
+if __name__ == "__main__":
+    uvicorn.run("main:app", host="localhost", reload=True)

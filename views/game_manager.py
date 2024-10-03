@@ -68,10 +68,10 @@ class GameManager:
         :param army_id:  id армии, для которой подбираем соперника
         :param id_list: список армий кандидатов
         :param army_in_figths: армиии, которые уже в бою
+        :param timeout: таймаут, чтобы функция не зависла
 
         :return: tuple[Army, Army] - кортеж с армиями-соперниками
         """
-        logger.info("Point 3")
         fight_with = army_id      # id потенциального противника
         is_found_victim = False   # найден ли противник
         res_rivals = None         # Кортеж соперников
@@ -85,17 +85,11 @@ class GameManager:
         while fight_with == army_id and not is_found_victim:   # Пока жертва не найдена
             fight_with = random.choice(id_list)                # Выбираем случайную армию-соперника
 
-            army_debug1 = await get_army_by_id(army_id=fight_with)  # Армия, для которой мы подбираем противника
-            army_debug2 = await get_army_by_id(army_id=fight_with)  # Потенциальный противник
-
-            logger.info(f"id={army_debug1.id}, content={dict(army_debug1)}")
-            logger.info(f"id={army_debug2.id}, content={dict(army_debug2)}")
-
             if fight_with != army_id:                          # Если мы не выбрали нашу армию
 
-                logger.info("Before get army by id")
+                #logger.info("Before get army by id")
                 army_to_fight = await get_army_by_id(army_id=fight_with) # Получаем потенциальную армию-соперника
-                logger.info(f"id={army_to_fight.id}, name={army_to_fight.name} type={type(army_to_fight)}")  # (1)
+                #logger.info(f"id={army_to_fight.id}, name={army_to_fight.name} type={type(army_to_fight)}")  # (1)
 
                 if army_to_fight not in army_in_figths:
                     # Если потенциальный соперник не в бою

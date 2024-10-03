@@ -27,19 +27,12 @@ async def access_warrior(**kwargs) -> Optional[Warrior | HTTPException]:
                 logger.error(f"Invalid DTO {kwargs['dto']}")
                 raise ValueError("Invalid DTO")
         case "put":
-            logger.debug("In warrior access")
-            if isinstance(kwargs['dto'], WarriorDto.Update):
-                logger.info(f"Warrior DTO {kwargs['dto']} передан в access, PUT")
-                try: 
-                    res = await WarriorLoader.update(**kwargs)
-                    return res
-                except BaseLoaderException:
-                    return HTTPException(status_code=status.HTTP_400_BAD_REQUEST)
-            else:
-                logger.error(f"Invalid DTO {kwargs['dto']}")
+            try: 
+                res = await WarriorLoader.update(**kwargs)
+                return res
+            except BaseLoaderException:
                 return HTTPException(status_code=status.HTTP_400_BAD_REQUEST)
         case 'patch':
-            logger.info(f"Warrior DTO {kwargs['dto']} передан в access, PATCH")
             try: 
                 return await WarriorLoader.update(**kwargs)
             except BaseLoaderException:

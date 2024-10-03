@@ -9,8 +9,9 @@ class WarriorLoader(ModelLoader):
     async def get(cls, id: int):
         warrior = None
         try:
-            logger.debug("In warrior loader")
+            logger.debug(f"In warrior loader, id={id}, type={type(id)}")
             warrior = await get_warrior(id)
+            logger.debug(f"Получен воин: {warrior}")
         except Exception as e:
             raise BaseLoaderException
         else:

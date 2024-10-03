@@ -24,15 +24,10 @@ async def access_archer(**kwargs) -> Optional[Archer | HTTPException]:
                 logger.error(f"Invalid DTO {kwargs['dto']}")
                 raise ValueError("Invalid DTO")
         case "put":
-            if isinstance(kwargs['dto'], ArcherDto.Update):
-                logger.info(f"Archer DTO {kwargs['dto']} передан в access, PUT")
-                try: 
-                    res = await ArcherLoader.update(**kwargs)
-                    return res
-                except BaseLoaderException:
-                    return HTTPException(status_code=status.HTTP_400_BAD_REQUEST)
-            else:
-                logger.error(f"Invalid DTO {kwargs['dto']}")
+            try: 
+                res = await ArcherLoader.update(**kwargs)
+                return res
+            except BaseLoaderException:
                 return HTTPException(status_code=status.HTTP_400_BAD_REQUEST)
         case "patch":
             logger.info(f"Archer DTO {kwargs['dto']} передан в access, PATCH")

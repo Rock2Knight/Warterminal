@@ -27,23 +27,21 @@ async def access_army(**kwargs):
                 except BaseLoaderException:
                     return HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY)
         case "put":
-            if isinstance(kwargs['army_dto'], ArmyDto.Update):
-                try:
-                    return await ArmyLoader.update(**kwargs)
-                except Exception as e:
-                    if isinstance(e, BaseLoaderException):
-                        return HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY)
-                    else:
-                        raise e
+            try:
+                return await ArmyLoader.update(**kwargs)
+            except Exception as e:
+                if isinstance(e, BaseLoaderException):
+                    return HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY)
+                else:
+                    raise e
         case "patch":
-            if isinstance(kwargs['army_dto'], ArmyDto.Update):
-                try:
-                    return await ArmyLoader.update(**kwargs)
-                except Exception as e:
-                    if isinstance(e, BaseLoaderException):
-                        return HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY)
-                    else:
-                        raise e
+            try:
+                return await ArmyLoader.update(**kwargs)
+            except Exception as e:
+                if isinstance(e, BaseLoaderException):
+                    return HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY)
+                else:
+                    raise e
         case "delete":
             try:
                 await ArmyLoader.delete(kwargs['id'])
