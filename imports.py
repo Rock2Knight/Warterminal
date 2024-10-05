@@ -36,8 +36,14 @@ from dto.varvar_dto import VarvarDto
 
 from views.fight import Fight
 
-from routers.warrior_router import router_warrior
+from routers.warrior import warrior_router
+from routers.archer import archer_router
+from routers.army import army_router
+from routers.game import game_router
+from routers.varvar import varvar_router 
 
 from models import *
 #from controllers import *
 import crud
+
+routers = list([archer_router, army_router, game_router, varvar_router, warrior_router])
